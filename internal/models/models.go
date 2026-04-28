@@ -21,6 +21,7 @@ type WishlistItem struct {
 	WishlistID int64     `json:"wishlistId"`
 	Name       string    `json:"name"`
 	URL        string    `json:"url"`
+	ImageURL   string    `json:"imageUrl"`
 	Notes      string    `json:"notes"`
 	PriceCents int64     `json:"priceCents"`
 	Priority   int       `json:"priority"`

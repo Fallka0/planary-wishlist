@@ -380,8 +380,8 @@ function WishlistPage({ user }: { user: User }) {
                 value={formState.name}
                 onChange={(event) => setFormState((current) => ({ ...current, name: event.target.value }))}
                 placeholder="AirPods Pro"
-                required
               />
+              <span className="input-hint">Leave this blank if the product page has a title we can pull in.</span>
             </div>
             <div className="input-group">
               <label htmlFor="item-url">URL</label>
@@ -391,6 +391,7 @@ function WishlistPage({ user }: { user: User }) {
                 onChange={(event) => setFormState((current) => ({ ...current, url: event.target.value }))}
                 placeholder="https://..."
               />
+              <span className="input-hint">When possible, we’ll fetch the image and price from this link.</span>
             </div>
             <div className="input-group">
               <label htmlFor="item-notes">Notes</label>
@@ -450,6 +451,11 @@ function WishlistPage({ user }: { user: User }) {
           <div className="item-list">
             {wishlist?.items.map((item) => (
               <article key={item.id} className={`item-card ${item.reserved ? 'item-card-reserved' : ''}`}>
+                {item.imageUrl ? (
+                  <div className="item-image-wrap">
+                    <img src={item.imageUrl} alt={item.name} className="item-image" loading="lazy" />
+                  </div>
+                ) : null}
                 <div className="item-topline">
                   <span className="priority-pill">Priority {item.priority}</span>
                   <span className="item-price">{formatPrice(item.priceCents)}</span>

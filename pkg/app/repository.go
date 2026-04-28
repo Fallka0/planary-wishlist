@@ -135,7 +135,7 @@ func GetWishlist(ctx context.Context, userID int64) (models.Wishlist, error) {
 	}
 
 	rows, err := pool.Query(ctx, `
-		SELECT id, wishlist_id, name, url, notes, price_cents, priority, reserved, created_at
+		SELECT id, wishlist_id, name, url, image_url, notes, price_cents, priority, reserved, created_at
 		FROM wishlist_items
 		WHERE wishlist_id = $1
 		ORDER BY created_at DESC
@@ -153,6 +153,7 @@ func GetWishlist(ctx context.Context, userID int64) (models.Wishlist, error) {
 			&item.WishlistID,
 			&item.Name,
 			&item.URL,
+			&item.ImageURL,
 			&item.Notes,
 			&item.PriceCents,
 			&item.Priority,
@@ -174,9 +175,26 @@ func CreateWishlistItem(ctx context.Context, userID int64, item models.WishlistI
 		return models.WishlistItem{}, err
 	}
 
+	item.URL = strings.TrimSpace(item.URL)
 	name := strings.TrimSpace(item.Name)
+
+	if item.URL != "" {
+		if metadata, err := fetchLinkMetadata(ctx, item.URL); err == nil {
+			if name == "" {
+				name = metadata.Title
+			}
+			if item.ImageURL == "" {
+				item.ImageURL = metadata.ImageURL
+			}
+			if item.PriceCents <= 0 {
+				item.PriceCents = metadata.PriceCents
+			}
+			item.URL = firstNonEmpty(normalizeURLOrEmpty(item.URL), item.URL)
+		}
+	}
+
 	if name == "" {
-		return models.WishlistItem{}, errors.New("product name is required")
+		return models.WishlistItem{}, errors.New("product name is required unless we can infer it from the link")
 	}
 
 	if item.Priority < 1 || item.Priority > 3 {
@@ -190,15 +208,16 @@ func CreateWishlistItem(ctx context.Context, userID int64, item models.WishlistI
 
 	var created models.WishlistItem
 	err = pool.QueryRow(ctx, `
-		INSERT INTO wishlist_items (wishlist_id, name, url, notes, price_cents, priority, reserved)
-		VALUES ($1, $2, $3, $4, $5, $6, FALSE)
-		RETURNING id, wishlist_id, name, url, notes, price_cents, priority, reserved, created_at
-	`, wishlist.ID, name, strings.TrimSpace(item.URL), strings.TrimSpace(item.Notes), item.PriceCents, item.Priority).
+		INSERT INTO wishlist_items (wishlist_id, name, url, image_url, notes, price_cents, priority, reserved)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)
+		RETURNING id, wishlist_id, name, url, image_url, notes, price_cents, priority, reserved, created_at
+	`, wishlist.ID, name, item.URL, strings.TrimSpace(item.ImageURL), strings.TrimSpace(item.Notes), item.PriceCents, item.Priority).
 		Scan(
 			&created.ID,
 			&created.WishlistID,
 			&created.Name,
 			&created.URL,
+			&created.ImageURL,
 			&created.Notes,
 			&created.PriceCents,
 			&created.Priority,
@@ -225,12 +244,13 @@ func UpdateWishlistItemReservation(ctx context.Context, userID, itemID int64, re
 		UPDATE wishlist_items
 		SET reserved = $1
 		WHERE id = $2 AND wishlist_id = $3
-		RETURNING id, wishlist_id, name, url, notes, price_cents, priority, reserved, created_at
+		RETURNING id, wishlist_id, name, url, image_url, notes, price_cents, priority, reserved, created_at
 	`, reserved, itemID, wishlist.ID).Scan(
 		&updated.ID,
 		&updated.WishlistID,
 		&updated.Name,
 		&updated.URL,
+		&updated.ImageURL,
 		&updated.Notes,
 		&updated.PriceCents,
 		&updated.Priority,
@@ -271,4 +291,12 @@ func DeleteWishlistItem(ctx context.Context, userID, itemID int64) error {
 
 func normalizeEmail(email string) string {
 	return strings.TrimSpace(strings.ToLower(email))
+}
+
+func normalizeURLOrEmpty(rawURL string) string {
+	normalizedURL, err := normalizeLinkURL(rawURL)
+	if err != nil {
+		return ""
+	}
+	return normalizedURL
 }

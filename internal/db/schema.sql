@@ -17,11 +17,14 @@ CREATE TABLE IF NOT EXISTS wishlist_items (
   wishlist_id BIGINT NOT NULL REFERENCES wishlists(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   url TEXT NOT NULL DEFAULT '',
+  image_url TEXT NOT NULL DEFAULT '',
   notes TEXT NOT NULL DEFAULT '',
   price_cents BIGINT NOT NULL DEFAULT 0,
   priority INTEGER NOT NULL DEFAULT 2,
   reserved BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE wishlist_items ADD COLUMN IF NOT EXISTS image_url TEXT NOT NULL DEFAULT '';
 
 CREATE INDEX IF NOT EXISTS idx_wishlist_items_wishlist_id ON wishlist_items (wishlist_id);

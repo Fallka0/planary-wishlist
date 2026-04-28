@@ -9,6 +9,7 @@ export interface WishlistItem {
   wishlistId: number;
   name: string;
   url: string;
+  imageUrl: string;
   notes: string;
   priceCents: number;
   priority: number;

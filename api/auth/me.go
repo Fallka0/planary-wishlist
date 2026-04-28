@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"planary-wishlist/internal/httpapi"
+	"planary-wishlist/pkg/httpapi"
 )
 
 func MeHandler(w http.ResponseWriter, r *http.Request) {

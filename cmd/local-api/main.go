@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"planary-wishlist/internal/httpapi"
+	"planary-wishlist/pkg/httpapi"
 
 	"github.com/joho/godotenv"
 )

@@ -493,13 +493,13 @@ function WishlistPage({ user }: { user: User }) {
 }
 
 export default function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [session, setSession] = useState<SessionState>({ user: null, loading: true });
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem('planary-theme');
-    setIsDarkMode(storedTheme === 'dark');
+    setIsDarkMode(storedTheme !== 'light');
   }, []);
 
   useEffect(() => {

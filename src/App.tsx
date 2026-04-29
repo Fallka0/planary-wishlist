@@ -47,7 +47,12 @@ function formatPrice(priceCents: number) {
 
 function AppLayout({ isDarkMode, toggleTheme, user, onLogout, children }: LayoutProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   return (
     <div className="auth-container app-shell">
@@ -60,16 +65,40 @@ function AppLayout({ isDarkMode, toggleTheme, user, onLogout, children }: Layout
           />
         </Link>
 
-        <div className="header-right">
-          <nav className="nav-links dashboard-nav-links">
-            <Link to="/">Home</Link>
-            <Link to="/wishlist">Wishlist</Link>
+        <div className="header-actions">
+          <button
+            type="button"
+            className={`menu-toggle-btn ${isMenuOpen ? 'is-open' : ''}`}
+            onClick={() => setIsMenuOpen((value) => !value)}
+            aria-expanded={isMenuOpen}
+            aria-controls="primary-navigation"
+            aria-label="Toggle Navigation Menu"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+
+          <nav
+            id="primary-navigation"
+            className={`nav-links dashboard-nav-links ${isMenuOpen ? 'is-open' : ''}`}
+            aria-label="Primary Navigation"
+          >
+            <Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link>
+            <Link to="/wishlist" onClick={() => setIsMenuOpen(false)}>Wishlist</Link>
             {user ? (
-              <button type="button" className="auth-nav-link auth-nav-button" onClick={() => void onLogout()}>
+              <button
+                type="button"
+                className="auth-nav-link auth-nav-button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  void onLogout();
+                }}
+              >
                 Log out
               </button>
             ) : (
-              <Link to="/" className="auth-nav-link">
+              <Link to="/" className="auth-nav-link" onClick={() => setIsMenuOpen(false)}>
                 Sign in
               </Link>
             )}

@@ -61,6 +61,10 @@ function AppLayout({ isDarkMode, toggleTheme, user, onLogout, children }: Layout
             alt="Planary Logo"
             className="header-logo"
           />
+          <span className="brand-copy">
+            <span className="brand-title">Planary</span>
+            <span className="brand-subtitle">Wishlist</span>
+          </span>
         </Link>
 
         <div className="header-actions">

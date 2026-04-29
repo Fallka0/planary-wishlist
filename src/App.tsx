@@ -15,8 +15,6 @@ import {
   updateWishlistItem,
 } from './lib/api';
 
-import logoBlau from './assets/blauOH.png';
-import logoViolette from './assets/violetteOH.png';
 import logoA from './assets/logoA.jpg';
 import logoB from './assets/logoB.jpg';
 import moonEmpty from './assets/moonEmpty.svg';
@@ -59,7 +57,7 @@ function AppLayout({ isDarkMode, toggleTheme, user, onLogout, children }: Layout
       <header className="header">
         <Link to={user ? '/wishlist' : '/'} className="brand-link" aria-label="Planary Wishlist Home">
           <img
-            src={isDarkMode ? logoViolette : logoBlau}
+            src="/brand-icon.svg"
             alt="Planary Logo"
             className="header-logo"
           />

@@ -1,7 +1,8 @@
+import { supabase } from './supabase';
+
 export interface User {
-  id: number;
+  id: string;
   email: string;
-  createdAt: string;
 }
 
 export interface WishlistItem {
@@ -30,13 +31,29 @@ interface JsonErrorResponse {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
+async function authHeaders() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  return session?.access_token
+    ? {
+        Authorization: `Bearer ${session.access_token}`,
+      }
+    : {};
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers);
+  headers.set('Content-Type', 'application/json');
+
+  const authorizationHeaders = await authHeaders();
+  if (authorizationHeaders.Authorization) {
+    headers.set('Authorization', authorizationHeaders.Authorization);
+  }
+
   const response = await fetch(`${API_BASE}${path}`, {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
+    headers,
     ...init,
   });
 
@@ -60,26 +77,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function fetchSession() {
   return request<{ user: User }>('/api/auth/me');
-}
-
-export function register(email: string, password: string) {
-  return request<{ user: User }>('/api/auth/register', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-}
-
-export function login(email: string, password: string) {
-  return request<{ user: User }>('/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-}
-
-export function logout() {
-  return request<void>('/api/auth/logout', {
-    method: 'POST',
-  });
 }
 
 export function fetchWishlist() {

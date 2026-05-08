@@ -3,17 +3,17 @@ package models
 import "time"
 
 type User struct {
-	ID        int64     `json:"id"`
+	ID        string    `json:"id"`
 	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt time.Time `json:"createdAt,omitempty"`
 }
 
 type Wishlist struct {
-	ID        int64          `json:"id"`
-	UserID    int64          `json:"-"`
-	Title     string         `json:"title"`
-	CreatedAt time.Time      `json:"createdAt"`
-	Items     []WishlistItem `json:"items"`
+	ID         int64          `json:"id"`
+	AuthUserID string         `json:"-"`
+	Title      string         `json:"title"`
+	CreatedAt  time.Time      `json:"createdAt"`
+	Items      []WishlistItem `json:"items"`
 }
 
 type WishlistItem struct {

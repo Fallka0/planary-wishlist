@@ -9,122 +9,43 @@ import (
 	"planary-wishlist/pkg/models"
 
 	"github.com/jackc/pgx/v5"
-	"golang.org/x/crypto/bcrypt"
 )
 
-var ErrInvalidCredentials = errors.New("invalid email or password")
-
-func CreateUser(ctx context.Context, email, password string) (models.User, error) {
-	pool, err := db.Pool(ctx)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	email = normalizeEmail(email)
-	if len(password) < 8 {
-		return models.User{}, errors.New("password must be at least 8 characters")
-	}
-
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	var user models.User
-	err = pool.QueryRow(ctx, `
-		INSERT INTO users (email, password_hash)
-		VALUES ($1, $2)
-		RETURNING id, email, created_at
-	`, email, string(passwordHash)).Scan(&user.ID, &user.Email, &user.CreatedAt)
-	if err != nil {
-		if strings.Contains(err.Error(), "duplicate key") {
-			return models.User{}, errors.New("an account with that email already exists")
-		}
-		return models.User{}, err
-	}
-
-	if _, err := EnsureWishlist(ctx, user.ID); err != nil {
-		return models.User{}, err
-	}
-
-	return user, nil
-}
-
-func AuthenticateUser(ctx context.Context, email, password string) (models.User, error) {
-	pool, err := db.Pool(ctx)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	var (
-		user         models.User
-		passwordHash string
-	)
-
-	err = pool.QueryRow(ctx, `
-		SELECT id, email, password_hash, created_at
-		FROM users
-		WHERE email = $1
-	`, normalizeEmail(email)).Scan(&user.ID, &user.Email, &passwordHash, &user.CreatedAt)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return models.User{}, ErrInvalidCredentials
-		}
-		return models.User{}, err
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password)); err != nil {
-		return models.User{}, ErrInvalidCredentials
-	}
-
-	if _, err := EnsureWishlist(ctx, user.ID); err != nil {
-		return models.User{}, err
-	}
-
-	return user, nil
-}
-
-func GetUserByID(ctx context.Context, userID int64) (models.User, error) {
-	pool, err := db.Pool(ctx)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	var user models.User
-	err = pool.QueryRow(ctx, `
-		SELECT id, email, created_at
-		FROM users
-		WHERE id = $1
-	`, userID).Scan(&user.ID, &user.Email, &user.CreatedAt)
-	return user, err
-}
-
-func EnsureWishlist(ctx context.Context, userID int64) (models.Wishlist, error) {
+func EnsureWishlist(ctx context.Context, authUserID string) (models.Wishlist, error) {
 	pool, err := db.Pool(ctx)
 	if err != nil {
 		return models.Wishlist{}, err
 	}
 
+	authUserID = strings.TrimSpace(authUserID)
+	if authUserID == "" {
+		return models.Wishlist{}, errors.New("auth user id is required")
+	}
+
 	_, err = pool.Exec(ctx, `
-		INSERT INTO wishlists (user_id, title)
-		VALUES ($1, 'My Wishlist')
-		ON CONFLICT (user_id) DO NOTHING
-	`, userID)
+		INSERT INTO wishlists (auth_user_id, title)
+		SELECT $1::uuid, 'My Wishlist'
+		WHERE NOT EXISTS (
+			SELECT 1
+			FROM wishlists
+			WHERE auth_user_id = $1::uuid
+		)
+	`, authUserID)
 	if err != nil {
 		return models.Wishlist{}, err
 	}
 
 	var wishlist models.Wishlist
 	err = pool.QueryRow(ctx, `
-		SELECT id, user_id, title, created_at
+		SELECT id, auth_user_id::text, title, created_at
 		FROM wishlists
-		WHERE user_id = $1
-	`, userID).Scan(&wishlist.ID, &wishlist.UserID, &wishlist.Title, &wishlist.CreatedAt)
+		WHERE auth_user_id = $1::uuid
+	`, authUserID).Scan(&wishlist.ID, &wishlist.AuthUserID, &wishlist.Title, &wishlist.CreatedAt)
 	return wishlist, err
 }
 
-func GetWishlist(ctx context.Context, userID int64) (models.Wishlist, error) {
-	wishlist, err := EnsureWishlist(ctx, userID)
+func GetWishlist(ctx context.Context, authUserID string) (models.Wishlist, error) {
+	wishlist, err := EnsureWishlist(ctx, authUserID)
 	if err != nil {
 		return models.Wishlist{}, err
 	}
@@ -169,8 +90,8 @@ func GetWishlist(ctx context.Context, userID int64) (models.Wishlist, error) {
 	return wishlist, rows.Err()
 }
 
-func CreateWishlistItem(ctx context.Context, userID int64, item models.WishlistItem) (models.WishlistItem, error) {
-	wishlist, err := EnsureWishlist(ctx, userID)
+func CreateWishlistItem(ctx context.Context, authUserID string, item models.WishlistItem) (models.WishlistItem, error) {
+	wishlist, err := EnsureWishlist(ctx, authUserID)
 	if err != nil {
 		return models.WishlistItem{}, err
 	}
@@ -228,8 +149,8 @@ func CreateWishlistItem(ctx context.Context, userID int64, item models.WishlistI
 	return created, err
 }
 
-func UpdateWishlistItemReservation(ctx context.Context, userID, itemID int64, reserved bool) (models.WishlistItem, error) {
-	wishlist, err := EnsureWishlist(ctx, userID)
+func UpdateWishlistItemReservation(ctx context.Context, authUserID string, itemID int64, reserved bool) (models.WishlistItem, error) {
+	wishlist, err := EnsureWishlist(ctx, authUserID)
 	if err != nil {
 		return models.WishlistItem{}, err
 	}
@@ -265,8 +186,8 @@ func UpdateWishlistItemReservation(ctx context.Context, userID, itemID int64, re
 	return updated, err
 }
 
-func DeleteWishlistItem(ctx context.Context, userID, itemID int64) error {
-	wishlist, err := EnsureWishlist(ctx, userID)
+func DeleteWishlistItem(ctx context.Context, authUserID string, itemID int64) error {
+	wishlist, err := EnsureWishlist(ctx, authUserID)
 	if err != nil {
 		return err
 	}
@@ -287,10 +208,6 @@ func DeleteWishlistItem(ctx context.Context, userID, itemID int64) error {
 		return errors.New("wishlist item not found")
 	}
 	return nil
-}
-
-func normalizeEmail(email string) string {
-	return strings.TrimSpace(strings.ToLower(email))
 }
 
 func normalizeURLOrEmpty(rawURL string) string {

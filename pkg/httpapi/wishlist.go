@@ -28,12 +28,12 @@ func Wishlist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, ok := requireUserID(w, r)
+	sharedUser, ok := requireUser(w, r)
 	if !ok {
 		return
 	}
 
-	wishlist, err := app.GetWishlist(r.Context(), userID)
+	wishlist, err := app.GetWishlist(r.Context(), sharedUser.ID)
 	if err != nil {
 		httpx.Error(w, http.StatusInternalServerError, "failed to load wishlist")
 		return
@@ -43,7 +43,7 @@ func Wishlist(w http.ResponseWriter, r *http.Request) {
 }
 
 func WishlistItems(w http.ResponseWriter, r *http.Request) {
-	userID, ok := requireUserID(w, r)
+	sharedUser, ok := requireUser(w, r)
 	if !ok {
 		return
 	}
@@ -56,7 +56,7 @@ func WishlistItems(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		item, err := app.CreateWishlistItem(r.Context(), userID, models.WishlistItem{
+		item, err := app.CreateWishlistItem(r.Context(), sharedUser.ID, models.WishlistItem{
 			Name:       payload.Name,
 			URL:        payload.URL,
 			Notes:      payload.Notes,
@@ -82,7 +82,7 @@ func WishlistItems(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		item, err := app.UpdateWishlistItemReservation(r.Context(), userID, itemID, payload.Reserved)
+		item, err := app.UpdateWishlistItemReservation(r.Context(), sharedUser.ID, itemID, payload.Reserved)
 		if err != nil {
 			httpx.Error(w, http.StatusBadRequest, err.Error())
 			return
@@ -96,7 +96,7 @@ func WishlistItems(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := app.DeleteWishlistItem(r.Context(), userID, itemID); err != nil {
+		if err := app.DeleteWishlistItem(r.Context(), sharedUser.ID, itemID); err != nil {
 			httpx.Error(w, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -116,13 +116,13 @@ func Health(w http.ResponseWriter, r *http.Request) {
 	httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
-func requireUserID(w http.ResponseWriter, r *http.Request) (int64, bool) {
-	userID, err := auth.UserIDFromRequest(r)
+func requireUser(w http.ResponseWriter, r *http.Request) (auth.User, bool) {
+	user, err := auth.UserFromRequest(r)
 	if err != nil {
 		httpx.Error(w, http.StatusUnauthorized, "not authenticated")
-		return 0, false
+		return auth.User{}, false
 	}
-	return userID, true
+	return user, true
 }
 
 func parseItemID(r *http.Request) (int64, error) {

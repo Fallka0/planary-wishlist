@@ -9,11 +9,9 @@ import {
   deleteWishlistItem,
   fetchSession,
   fetchWishlist,
-  login,
-  logout,
-  register,
   updateWishlistItem,
 } from './lib/api';
+import { supabase } from './lib/supabase';
 
 import logoA from './assets/logoA.jpg';
 import logoB from './assets/logoB.jpg';
@@ -36,11 +34,41 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+const AUTH_BASE_URL = import.meta.env.VITE_AUTH_BASE_URL ?? 'https://auth.planary.ch';
+
 function formatPrice(priceCents: number) {
   return new Intl.NumberFormat('de-CH', {
     style: 'currency',
     currency: 'CHF',
   }).format(priceCents / 100);
+}
+
+function buildAuthUrl(mode: 'login' | 'signup', returnTo?: string) {
+  const target = new URL(mode === 'signup' ? '/signup' : '/', AUTH_BASE_URL);
+  target.searchParams.set('returnTo', returnTo ?? `${window.location.origin}/wishlist`);
+  return target.toString();
+}
+
+async function absorbSessionFromHash() {
+  const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+  const params = new URLSearchParams(hash);
+  const accessToken = params.get('access_token');
+  const refreshToken = params.get('refresh_token');
+
+  if (!accessToken || !refreshToken) {
+    return false;
+  }
+
+  const { error } = await supabase.auth.setSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  });
+  if (error) {
+    throw error;
+  }
+
+  window.history.replaceState({}, document.title, `${window.location.pathname}${window.location.search}`);
+  return true;
 }
 
 function AppLayout({ isDarkMode, toggleTheme, user, onLogout, children }: LayoutProps) {
@@ -161,36 +189,12 @@ function AppLayout({ isDarkMode, toggleTheme, user, onLogout, children }: Layout
 
 function AuthPage({
   mode,
-  onAuth,
 }: {
   mode: 'login' | 'register';
-  onAuth: (user: User) => void;
 }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
-
   useEffect(() => {
     document.title = mode === 'login' ? 'Planary Wishlist | Sign in' : 'Planary Wishlist | Create account';
   }, [mode]);
-
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    setErrorMessage('');
-    setIsSubmitting(true);
-
-    try {
-      const payload = mode === 'login' ? await login(email, password) : await register(email, password);
-      onAuth(payload.user);
-      navigate('/wishlist');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Something went wrong');
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
 
   return (
     <div className="auth-experience">
@@ -231,42 +235,17 @@ function AuthPage({
         <h2>{mode === 'login' ? 'Sign in for Planary Wishlist' : 'Create your wishlist account'}</h2>
         <p className="auth-card-subtitle">
           {mode === 'login'
-            ? 'Access your existing wishlist and keep items organized.'
-            : 'Start your own list and share ideas with the people around you.'}
+            ? 'Use your shared Planary account and come straight back to your wishlist.'
+            : 'Create one shared Planary account and use it across every app.'}
         </p>
 
-        {errorMessage ? <p className="message-box error-msg">{errorMessage}</p> : null}
-
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label htmlFor="email">Email address</label>
-            <input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="At least 8 characters"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              minLength={8}
-              required
-            />
-          </div>
-
-          <button type="submit" className="btn-primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Create account'}
-          </button>
-        </form>
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={() => window.location.assign(buildAuthUrl(mode === 'login' ? 'login' : 'signup'))}
+        >
+          {mode === 'login' ? 'Continue to Planary Auth' : 'Create account on Planary Auth'}
+        </button>
 
         <div className="divider">OR</div>
 
@@ -541,6 +520,7 @@ export default function App() {
   useEffect(() => {
     async function bootstrapSession() {
       try {
+        await absorbSessionFromHash();
         const payload = await fetchSession();
         setSession({ user: payload.user, loading: false });
       } catch {
@@ -552,13 +532,9 @@ export default function App() {
   }, []);
 
   async function handleLogout() {
-    await logout();
+    await supabase.auth.signOut();
     setSession({ user: null, loading: false });
     navigate('/');
-  }
-
-  function handleAuth(user: User) {
-    setSession({ user, loading: false });
   }
 
   if (session.loading) {
@@ -585,13 +561,13 @@ export default function App() {
         <Route
           path="/"
           element={
-            session.user ? <Navigate to="/wishlist" replace /> : <AuthPage mode="login" onAuth={handleAuth} />
+            session.user ? <Navigate to="/wishlist" replace /> : <AuthPage mode="login" />
           }
         />
         <Route
           path="/register"
           element={
-            session.user ? <Navigate to="/wishlist" replace /> : <AuthPage mode="register" onAuth={handleAuth} />
+            session.user ? <Navigate to="/wishlist" replace /> : <AuthPage mode="register" />
           }
         />
         <Route

@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS wishlists (
   id BIGSERIAL PRIMARY KEY,
-  user_id BIGINT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  user_id BIGINT UNIQUE REFERENCES users(id) ON DELETE CASCADE,
   title TEXT NOT NULL DEFAULT 'My Wishlist',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -26,5 +26,7 @@ CREATE TABLE IF NOT EXISTS wishlist_items (
 );
 
 ALTER TABLE wishlist_items ADD COLUMN IF NOT EXISTS image_url TEXT NOT NULL DEFAULT '';
-
+ALTER TABLE wishlists ALTER COLUMN user_id DROP NOT NULL;
+ALTER TABLE wishlists ADD COLUMN IF NOT EXISTS auth_user_id UUID;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_wishlists_auth_user_id ON wishlists (auth_user_id);
 CREATE INDEX IF NOT EXISTS idx_wishlist_items_wishlist_id ON wishlist_items (wishlist_id);

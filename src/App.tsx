@@ -189,9 +189,8 @@ function AppLayout({ isDarkMode, toggleTheme, user, onLogout, children }: Layout
           </div>
 
           <div className="footer-legal">
-            <a href="https://vercel.com">Vercel</a>
-            <a href="https://neon.tech">Neon</a>
-            <a href="https://reactbits.dev">React Bits</a>
+            <a href="/">Home</a>
+            <a href="/wishlist">Wishlist</a>
           </div>
         </div>
       </footer>
@@ -213,33 +212,13 @@ function AuthPage({
       <section className="auth-showcase">
         <span className="dashboard-kicker">Planary Wishlist</span>
         <BlurText
-          text="A shared wishlist that feels like part of the same product family."
+          text="Keep gift ideas together in one calm, focused place."
           className="hero-title"
           delay={90}
         />
         <p className="hero-copy">
-          Keep gift ideas, links, and notes in one beautiful place while reusing the same
-          blue-to-violet identity already present in your other Planary projects.
+          Save links, notes, and present ideas without turning the experience into a cluttered list of tabs and screenshots.
         </p>
-        <div className="hero-pill-row">
-          <span>Shared wishlist</span>
-          <span>Go API</span>
-          <span>Vercel-ready</span>
-        </div>
-        <div className="showcase-card">
-          <span className="showcase-card-label">Design system note</span>
-          <strong>Built with reused React Bits components</strong>
-          <p>
-            The animated headline and shimmer copy use the same React Bits-style building blocks
-            you already have in another project, so the motion language stays consistent.
-          </p>
-          <ShinyText
-            text="Unified visuals, cleaner handoff, faster hosting."
-            className="showcase-shiny"
-            color="var(--text-muted)"
-            shineColor="#ffffff"
-          />
-        </div>
       </section>
 
       <section className="auth-card">
@@ -461,7 +440,7 @@ function WishlistPage({ user }: { user: User }) {
         <div className="wishlist-panel items-panel">
           <div className="section-head">
             <h2>{wishlist?.title ?? 'My wishlist'}</h2>
-            <p>Your saved items stay in Postgres and are served by the Go API.</p>
+            <p>Your saved items are all here when you need them.</p>
           </div>
 
           {loading ? <p className="empty-state">Loading your wishlist...</p> : null}

@@ -347,7 +347,6 @@ body.dark-mode select:focus {
 }
 
 .dashboard-kicker,
-.showcase-card-label,
 .priority-pill {
   display: inline-flex;
   align-items: center;
@@ -372,7 +371,6 @@ body.dark-mode select:focus {
 
 .hero-copy,
 .auth-card-subtitle,
-.showcase-card p,
 .wishlist-hero-copy p,
 .section-head p,
 .item-notes,
@@ -383,44 +381,9 @@ body.dark-mode select:focus {
   line-height: 1.7;
 }
 
-.hero-pill-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 24px;
-}
-
-.hero-pill-row span,
 .wishlist-hero-copy span,
 .footer-legal a {
   color: var(--text-muted);
-}
-
-.hero-pill-row span {
-  padding: 9px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.45);
-  border: 1px solid var(--border-color);
-}
-
-.showcase-card {
-  margin-top: 28px;
-  padding: 22px;
-  border-radius: 22px;
-  background: var(--card-soft);
-  border: 1px solid var(--border-color);
-}
-
-.showcase-card strong {
-  display: block;
-  margin: 14px 0 10px;
-  font-size: 1.1rem;
-}
-
-.showcase-shiny {
-  display: inline-block;
-  margin-top: 10px;
-  font-weight: 700;
 }
 
 .auth-card {

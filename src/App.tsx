@@ -49,6 +49,14 @@ function buildAuthUrl(mode: 'login' | 'signup', returnTo?: string) {
   return target.toString();
 }
 
+function AuthRedirect({ mode, returnTo }: { mode: 'login' | 'signup'; returnTo?: string }) {
+  useEffect(() => {
+    window.location.assign(buildAuthUrl(mode, returnTo));
+  }, [mode, returnTo]);
+
+  return <div className="loading-state">Redirecting to Planary Auth...</div>;
+}
+
 async function absorbSessionFromHash() {
   const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
   const params = new URLSearchParams(hash);
@@ -128,9 +136,13 @@ function AppLayout({ isDarkMode, toggleTheme, user, onLogout, children }: Layout
                 Log out
               </button>
             ) : (
-              <Link to="/" className="auth-nav-link" onClick={() => setIsMenuOpen(false)}>
+              <a
+                href={buildAuthUrl('login')}
+                className="auth-nav-link"
+                onClick={() => setIsMenuOpen(false)}
+              >
                 Sign in
-              </Link>
+              </a>
             )}
           </nav>
 
@@ -572,7 +584,13 @@ export default function App() {
         />
         <Route
           path="/wishlist"
-          element={session.user ? <WishlistPage user={session.user} /> : <Navigate to="/" replace />}
+          element={
+            session.user ? (
+              <WishlistPage user={session.user} />
+            ) : (
+              <AuthRedirect mode="login" returnTo={`${window.location.origin}/wishlist`} />
+            )
+          }
         />
         <Route path="*" element={<Navigate to={session.user ? '/wishlist' : '/'} replace />} />
       </Routes>

@@ -15,10 +15,6 @@ import { supabase } from './lib/supabase';
 
 import logoA from './assets/logoA.jpg';
 import logoB from './assets/logoB.jpg';
-import moonEmpty from './assets/moonEmpty.svg';
-import moonFull from './assets/moonFull.svg';
-import sunEmpty from './assets/sunEmpty.svg';
-import sunFull from './assets/sunFull.svg';
 import tiktokLogo from './assets/tiktok.svg';
 
 interface SessionState {
@@ -27,8 +23,6 @@ interface SessionState {
 }
 
 interface LayoutProps {
-  isDarkMode: boolean;
-  toggleTheme: () => void;
   user: User | null;
   onLogout: () => Promise<void>;
   children: React.ReactNode;
@@ -79,8 +73,7 @@ async function absorbSessionFromHash() {
   return true;
 }
 
-function AppLayout({ isDarkMode, toggleTheme, user, onLogout, children }: LayoutProps) {
-  const [isHovered, setIsHovered] = useState(false);
+function AppLayout({ user, onLogout, children }: LayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -146,23 +139,6 @@ function AppLayout({ isDarkMode, toggleTheme, user, onLogout, children }: Layout
             )}
           </nav>
 
-          <button
-            onClick={toggleTheme}
-            className="theme-toggle-btn"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            aria-label="Toggle Theme"
-          >
-            <img
-              src={
-                isDarkMode
-                  ? (isHovered ? sunFull : sunEmpty)
-                  : (isHovered ? moonFull : moonEmpty)
-              }
-              alt=""
-              className="theme-icon"
-            />
-          </button>
         </div>
       </header>
 
@@ -494,19 +470,8 @@ function WishlistPage({ user }: { user: User }) {
 }
 
 export default function App() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [session, setSession] = useState<SessionState>({ user: null, loading: true });
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const storedTheme = window.localStorage.getItem('planary-theme');
-    setIsDarkMode(storedTheme !== 'light');
-  }, []);
-
-  useEffect(() => {
-    document.body.classList.toggle('dark-mode', isDarkMode);
-    window.localStorage.setItem('planary-theme', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode]);
 
   useEffect(() => {
     async function bootstrapSession() {
@@ -531,8 +496,6 @@ export default function App() {
   if (session.loading) {
     return (
       <AppLayout
-        isDarkMode={isDarkMode}
-        toggleTheme={() => setIsDarkMode((current) => !current)}
         user={session.user}
         onLogout={handleLogout}
       >
@@ -543,8 +506,6 @@ export default function App() {
 
   return (
     <AppLayout
-      isDarkMode={isDarkMode}
-      toggleTheme={() => setIsDarkMode((current) => !current)}
       user={session.user}
       onLogout={handleLogout}
     >

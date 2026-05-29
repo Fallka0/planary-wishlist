@@ -47,10 +47,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top right, rgba(139, 92, 246, 0.18), transparent 24%),
-    radial-gradient(circle at left 25%, rgba(167, 139, 250, 0.14), transparent 28%),
-    var(--bg-color);
+  background: #ffffff;
   color: var(--text-main);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -108,30 +105,6 @@ body.dark-mode select:focus {
   overflow: hidden;
 }
 
-.app-shell::before,
-.app-shell::after {
-  content: '';
-  position: fixed;
-  border-radius: 999px;
-  pointer-events: none;
-  filter: blur(24px);
-}
-
-.app-shell::before {
-  top: 98px;
-  right: -60px;
-  width: 260px;
-  height: 260px;
-  background: rgba(139, 92, 246, 0.14);
-}
-
-.app-shell::after {
-  bottom: 120px;
-  left: -80px;
-  width: 240px;
-  height: 240px;
-  background: rgba(139, 92, 246, 0.12);
-}
 
 .auth-container {
   display: flex;

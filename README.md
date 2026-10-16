@@ -21,7 +21,7 @@ Version 2 is being built from the handoff in [`docs/wishlist-v2/`](docs/wishlist
 
 ```
 src/              React + Vite frontend
-api/              Vercel Go function entrypoints, one per route
+api/router.go     the one Vercel Go function; vercel.json sends all /api/* here
 pkg/
   auth/           Supabase bearer-token check, display name
   db/             connection pool and migrations runner
@@ -35,7 +35,7 @@ cmd/local-api/    local Go server for development (same handlers as api/)
 docs/wishlist-v2/ design and implementation handoff for v2
 ```
 
-API: the v2 endpoints are specified in [`docs/wishlist-v2/api/API.md`](docs/wishlist-v2/api/API.md). Every route is listed once in `pkg/httpapi/routes.go` (served by `cmd/local-api`) and has a one-line entrypoint under `api/` for Vercel; a test fails if the two drift apart. The v1 routes (`/api/wishlist`, `/api/auth/*`) stay until the v2 frontend ships.
+API: the v2 endpoints are specified in [`docs/wishlist-v2/api/API.md`](docs/wishlist-v2/api/API.md). Every route is listed once in `pkg/httpapi/routes.go`. `cmd/local-api` serves that table directly; on Vercel, `vercel.json` rewrites every `/api/*` request to the single function `api/router.go`, which dispatches through the same table. One function instead of one per route keeps the deployment under the Hobby plan's limit of 12 functions. The v1 routes (`/api/wishlist`, `/api/auth/*`) stay until the v2 frontend ships.
 
 Migrations: every file in `pkg/db/migrations` runs once, in its own transaction behind an advisory lock, and is recorded in `schema_migrations`. Add a new numbered file for any schema change; never edit one that has shipped.
 

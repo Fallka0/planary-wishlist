@@ -1,11 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/**/*.go": {
+    "api/router.go": {
       "maxDuration": 10
     }
   },
   "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/router?__path=:path*"
+    },
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"

@@ -13,14 +13,7 @@ import (
 func main() {
 	_ = godotenv.Load()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/api/health", httpapi.Health)
-	mux.HandleFunc("/api/auth/register", httpapi.Register)
-	mux.HandleFunc("/api/auth/login", httpapi.Login)
-	mux.HandleFunc("/api/auth/logout", httpapi.Logout)
-	mux.HandleFunc("/api/auth/me", httpapi.Me)
-	mux.HandleFunc("/api/wishlist", httpapi.Wishlist)
-	mux.HandleFunc("/api/wishlist/items", httpapi.WishlistItems)
+	mux := httpapi.Mux()
 
 	port := os.Getenv("PORT")
 	if port == "" {

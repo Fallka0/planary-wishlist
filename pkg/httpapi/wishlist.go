@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -116,11 +117,16 @@ func Health(w http.ResponseWriter, r *http.Request) {
 	httpx.JSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
+// requireUser checks the bearer token and refreshes the caller's profile (email and display name).
 func requireUser(w http.ResponseWriter, r *http.Request) (auth.User, bool) {
 	user, err := auth.UserFromRequest(r)
 	if err != nil {
 		httpx.Error(w, http.StatusUnauthorized, "not authenticated")
 		return auth.User{}, false
+	}
+	// The profile is only a cache of names, so a failed write shouldn't fail the request.
+	if err := app.UpsertProfile(r.Context(), user); err != nil {
+		log.Printf("upsert profile %s: %v", user.ID, err)
 	}
 	return user, true
 }

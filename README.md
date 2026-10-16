@@ -10,23 +10,30 @@ Team project under the Planary brand, where I was the lead developer.
 
 ## Features
 
-- Registration and login with session cookies (HttpOnly, JWT)
+- Sign-in with the shared Planary account (auth.planary.ch, Supabase). The API checks the bearer token against Supabase.
 - Wishlists and items stored in Postgres
 - **Link preview:** paste a URL and the backend reads Open Graph tags, JSON-LD and price hints from the page
 - Frontend and Go API deployed together as one Vercel project, so no CORS setup is needed
 
+Version 2 is being built from the handoff in [`docs/wishlist-v2/`](docs/wishlist-v2/README.md).
+
 ## Architecture
 
 ```
-src/            React + Vite frontend
-api/            Vercel Go function entrypoints
-internal/
-  auth/         sessions and JWT
-  db/           connection and schema
-  httpapi/      HTTP handlers (auth, wishlist)
-  app/          business logic, link preview
-cmd/local-api/  local Go server for development
+src/              React + Vite frontend
+api/              Vercel Go function entrypoints, one per route
+pkg/
+  auth/           Supabase bearer-token check, display name
+  db/             connection pool and migrations runner
+    migrations/   numbered SQL files, applied in order on the first request
+  app/            business logic and SQL, link preview
+  httpapi/        HTTP handlers
+  httpx/          JSON helpers
+cmd/local-api/    local Go server for development (same handlers as api/)
+docs/wishlist-v2/ design and implementation handoff for v2
 ```
+
+Migrations: every file in `pkg/db/migrations` runs once, in its own transaction behind an advisory lock, and is recorded in `schema_migrations`. Add a new numbered file for any schema change; never edit one that has shipped.
 
 ## What I learned
 
@@ -35,10 +42,15 @@ The code worked, but the product did not take off: we built before checking clea
 ## Run locally
 
 ```bash
-npm install && go mod tidy
-cp .env.example .env    # set DATABASE_URL and JWT_SECRET
+npm install
+cp .env.example .env    # set DATABASE_URL and the Supabase keys
 npm run api:dev         # Go API on :8080
 npm run dev             # frontend, proxies /api to :8080
 ```
 
-Tables are created automatically on the first request.
+Tests:
+
+```bash
+npm run test            # frontend (vitest)
+npm run test:go         # go vet + go test; set DATABASE_URL_TEST to include the database tests
+```

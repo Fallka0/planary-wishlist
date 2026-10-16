@@ -3,7 +3,6 @@ package httpapi
 import (
 	"net/http"
 
-	"planary-wishlist/pkg/auth"
 	"planary-wishlist/pkg/httpx"
 )
 
@@ -30,9 +29,8 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := auth.UserFromRequest(r)
-	if err != nil {
-		httpx.Error(w, http.StatusUnauthorized, "not authenticated")
+	user, ok := requireUser(w, r)
+	if !ok {
 		return
 	}
 

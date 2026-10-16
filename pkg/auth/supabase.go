@@ -12,8 +12,9 @@ import (
 )
 
 type User struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
+	ID           string         `json:"id"`
+	Email        string         `json:"email"`
+	UserMetadata map[string]any `json:"user_metadata"`
 }
 
 func bearerToken(r *http.Request) (string, error) {

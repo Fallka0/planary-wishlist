@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"embed"
 	"errors"
 	"os"
 	"sync"
@@ -10,15 +9,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-//go:embed schema.sql
-var schemaFS embed.FS
-
 var (
 	pool    *pgxpool.Pool
 	initErr error
 	once    sync.Once
 )
 
+// Pool returns the shared connection pool. The first call connects and applies any pending migrations.
 func Pool(ctx context.Context) (*pgxpool.Pool, error) {
 	once.Do(func() {
 		databaseURL := os.Getenv("DATABASE_URL")
@@ -39,21 +36,11 @@ func Pool(ctx context.Context) (*pgxpool.Pool, error) {
 			return
 		}
 
-		if err = ensureSchema(ctx, pool); err != nil {
+		if _, err = Migrate(ctx, pool); err != nil {
 			initErr = err
 			return
 		}
 	})
 
 	return pool, initErr
-}
-
-func ensureSchema(ctx context.Context, pool *pgxpool.Pool) error {
-	schema, err := schemaFS.ReadFile("schema.sql")
-	if err != nil {
-		return err
-	}
-
-	_, err = pool.Exec(ctx, string(schema))
-	return err
 }

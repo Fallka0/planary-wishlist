@@ -1,0 +1,110 @@
+/*
+ * Planary Wishlist v2 · design tokens
+ * Source of truth: prototype/wishlist-app.dc.html (helmet <style>), same values as the
+ * Planary homepage and auth.planary.ch screens on the design canvas.
+ *
+ * Theme: light by default, dark via prefers-color-scheme, and an explicit override with
+ * <html data-theme="light|dark"> (the toggle in the top bar writes this + localStorage).
+ * Fonts: Unbounded 300/400 (display) and Manrope 400–700 (UI). Self-host with
+ * @fontsource/unbounded and @fontsource/manrope.
+ */
+
+:root {
+  /* surfaces */
+  --frame: #0b0b0f;          /* dark band around the app (14px desktop, 8px phone) */
+  --paper: #f5f5f7;          /* page background */
+  --card: #ececf0;           /* cards, inputs, chips background */
+  --card-h: #e3e3e9;         /* card hover, skeleton base */
+  --raise: #ffffff;          /* dialogs, drawers, focused inputs */
+
+  /* text */
+  --ink: #0b0b0f;            /* primary text, strong lines, active chip */
+  --t2: #55555e;             /* secondary text, captions (4.5:1+ on paper and card) */
+
+  /* lines */
+  --rule: #d4d4db;           /* dividers, borders */
+  --rule-s: #a9a9b3;         /* stronger border: hover, avatar rings, dashed pick pill */
+  --fb: transparent;         /* field border at rest (visible in dark) */
+
+  /* primary button */
+  --btn: #1f1b3a;            /* Planary indigo */
+  --btn-h: #2d2852;
+  --btn-fg: #f5f5f7;
+
+  /* accents and status */
+  --violet: #8b5cf6;         /* focus ring only */
+  --focus-ring: 0 0 0 3px rgba(139, 92, 246, .32);
+  --ok: #1d6b45;   --ok-bg: #e1f0e7;    /* "You're getting this" */
+  --err: #9b1c2e;  --err-bg: #f8e6e9;   /* errors, Remove */
+
+  /* item tiles: studio-light radial behind product image or icon */
+  --tile1: #ffffff; --tile2: #eeeef2; --tile3: #dcdce3; --tile-i: #26262d;
+  --tile-bg: radial-gradient(90% 80% at 50% 38%, var(--tile1) 0%, var(--tile2) 55%, var(--tile3) 100%);
+
+  /* overlays */
+  --scrim: rgba(11, 11, 15, .42);
+  --scrim-thin: rgba(11, 11, 15, .22);  /* behind the edit drawer */
+  --shadow: 0 30px 80px rgba(11, 11, 15, .24), 0 2px 8px rgba(11, 11, 15, .08);
+
+  /* type */
+  --disp: "Unbounded", "Archivo", ui-sans-serif, sans-serif;
+  --body: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --disp-tracking: -.045em;  /* display weight 300 */
+  --fs-body: 14px;  --lh-body: 1.5;
+  --fs-small: 13px; --fs-micro: 12px;
+  --fs-h1: clamp(30px, 3cqw, 42px);       /* page titles, 1.05 line-height */
+  --fs-h1-public: clamp(40px, 5cqw, 72px); /* public list title */
+  --fs-dlg: 26px;                          /* dialog titles (22px on phone) */
+  --fs-count: 40px;                        /* "17 days" countdown number */
+
+  /* radii */
+  --r-pill: 999px;
+  --r-field: 12px;   /* inputs */
+  --r-tile-s: 12px;  /* 56–64px row thumbnails */
+  --r-tile: 16px;    /* card images, mosaic */
+  --r-card: 18px;    /* occasion, person, side boxes */
+  --r-dlg: 24px;     /* dialogs, drawers, bottom sheets (top corners only on phone) */
+
+  /* sizes */
+  --topbar-h: 64px;      /* 60px on phone */
+  --sidebar-w: 264px;    /* 232px under 1100px container width, hidden under 760px */
+  --hit: 44px;           /* minimum touch target; dense controls are 36–40px on desktop only */
+  --btn-h-md: 44px; --btn-h-sm: 36px;
+  --field-h: 46px;
+
+  /* motion */
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --t-fast: 120ms;   /* hover, press */
+  --t-dlg: 260ms;    /* dialog pop */
+  --t-drawer: 320ms; /* drawer slide */
+}
+
+/* dark: system preference unless the user picked light */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #131317; --card: #1e1e24; --card-h: #26262d; --raise: #1a1a1f;
+    --ink: #f1f1f4; --t2: #a3a3ad;
+    --rule: #2c2c34; --rule-s: #4a4a54; --fb: #2c2c34;
+    --btn: #f1f1f4; --btn-h: #ffffff; --btn-fg: #0b0b0f;
+    --ok: #8fd8ae; --ok-bg: #15301f; --err: #f3a3b0; --err-bg: #3a1820;
+    --tile1: #34343c; --tile2: #202027; --tile3: #141418; --tile-i: #e9e9ee;
+    --scrim: rgba(0, 0, 0, .62);
+    --shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 0 1px #2c2c34;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #131317; --card: #1e1e24; --card-h: #26262d; --raise: #1a1a1f;
+  --ink: #f1f1f4; --t2: #a3a3ad;
+  --rule: #2c2c34; --rule-s: #4a4a54; --fb: #2c2c34;
+  --btn: #f1f1f4; --btn-h: #ffffff; --btn-fg: #0b0b0f;
+  --ok: #8fd8ae; --ok-bg: #15301f; --err: #f3a3b0; --err-bg: #3a1820;
+  --tile1: #34343c; --tile2: #202027; --tile3: #141418; --tile-i: #e9e9ee;
+  --scrim: rgba(0, 0, 0, .62);
+  --shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 0 1px #2c2c34;
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: 0ms !important; }
+}

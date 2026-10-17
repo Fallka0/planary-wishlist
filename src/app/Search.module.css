@@ -1,0 +1,113 @@
+.search {
+  position: relative;
+  flex: 1;
+  max-width: 420px;
+  margin-left: 40px;
+}
+
+.icon {
+  position: absolute;
+  left: 14px;
+  top: 11px;
+  color: var(--t2);
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  height: 40px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--fb);
+  background: var(--card);
+  padding: 0 16px 0 40px;
+  font: 500 14px/1 var(--body);
+  color: var(--ink);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input::placeholder {
+  color: var(--t2);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--ink);
+  background: var(--raise);
+}
+
+/* Not in the design: a plain popover in the same vocabulary as the dialogs. */
+.pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  max-height: min(480px, 70vh);
+  overflow: auto;
+  padding: 8px;
+  border-radius: 18px;
+  background: var(--raise);
+  box-shadow: var(--shadow);
+}
+
+.inline {
+  margin-top: 4px;
+}
+
+.group + .group {
+  margin-top: 8px;
+}
+
+.groupHead {
+  padding: 8px 10px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t2);
+}
+
+.result {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.result:hover,
+.result:focus-visible,
+.first {
+  background: var(--card);
+}
+
+.result span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--t2);
+}
+
+.empty {
+  padding: 10px;
+  font-size: 13px;
+  color: var(--t2);
+}
+
+@container site (max-width: 760px) {
+  .search {
+    display: none;
+  }
+
+  .sheet {
+    display: block;
+    margin: 0;
+    max-width: none;
+  }
+}
+
+/* The browser's own clear button is off-palette; Esc and select-all do the same. */
+.input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}

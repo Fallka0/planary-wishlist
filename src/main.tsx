@@ -1,13 +1,22 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
-import './styles.css';
+import '@fontsource/manrope/400.css';
+import '@fontsource/manrope/500.css';
+import '@fontsource/manrope/600.css';
+import '@fontsource/manrope/700.css';
+import '@fontsource/unbounded/300.css';
+import '@fontsource/unbounded/400.css';
+import './styles/tokens.css';
+import './styles/global.css';
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>,
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { App } from './app/App';
+import { absorbSessionFromHash } from './lib/session';
+
+// Coming back from auth.planary.ch: keep the tokens and clean the URL before anything renders.
+absorbSessionFromHash();
+
+createRoot(document.getElementById('root') as HTMLElement).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
 );

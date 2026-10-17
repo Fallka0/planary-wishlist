@@ -1,0 +1,191 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--scrim);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  animation: fade 180ms ease-out both;
+}
+
+.thin {
+  place-items: stretch;
+  background: var(--scrim-thin);
+}
+
+.dlg {
+  width: min(560px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  background: var(--raise);
+  color: var(--ink);
+  border-radius: var(--r-dlg);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  animation: pop var(--t-dlg) var(--ease) both;
+}
+
+.wide {
+  width: min(640px, 100%);
+}
+
+.dlg:focus {
+  outline: none;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.close {
+  margin: -6px -8px 0 0;
+}
+
+.title {
+  font-family: var(--disp);
+  font-weight: 300;
+  letter-spacing: var(--disp-tracking);
+  font-size: var(--fs-dlg);
+  line-height: 1.1;
+}
+
+.subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--t2);
+  max-width: 46ch;
+}
+
+.body {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 28px;
+}
+
+/* Something in the footer that sits on the left ("Add without a link", "Remove"). */
+.foot > :global(.grow) {
+  margin-right: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  bottom: 14px;
+  width: min(460px, calc(100% - 28px));
+  z-index: 41;
+  background: var(--raise);
+  color: var(--ink);
+  border-radius: var(--r-dlg);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  animation: slide var(--t-drawer) var(--ease) both;
+}
+
+.drawer:focus {
+  outline: none;
+}
+
+.drawer .foot {
+  margin-top: auto;
+  padding-top: 28px;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slide {
+  from {
+    opacity: 0.4;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes up {
+  from {
+    transform: translateY(40px);
+    opacity: 0.5;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* Phones: dialogs and drawers become bottom sheets. */
+@container site (max-width: 760px) {
+  .scrim {
+    place-items: end stretch;
+    padding: 0;
+  }
+
+  .dlg {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: var(--r-dlg) var(--r-dlg) 0 0;
+    padding: 20px 20px 28px;
+    animation: up 300ms var(--ease) both;
+  }
+
+  .drawer {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 92vh;
+    border-radius: var(--r-dlg) var(--r-dlg) 0 0;
+    padding: 20px 20px 28px;
+    animation: up 300ms var(--ease) both;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .foot > * {
+    flex: 1;
+  }
+
+  .foot > :global(.grow) {
+    flex: 0 0 100%;
+    order: 3;
+  }
+}

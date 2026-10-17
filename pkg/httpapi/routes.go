@@ -10,8 +10,7 @@ import (
 var Routes = map[string]http.HandlerFunc{
 	"/api/health": Health,
 
-	// v2
-	"/api/me":             MeV2,
+	"/api/me":             Me,
 	"/api/search":         Search,
 	"/api/overview":       Overview,
 	"/api/lists":          Lists,
@@ -28,14 +27,6 @@ var Routes = map[string]http.HandlerFunc{
 	"/api/members/link":   MembersLink,
 	"/api/invite":         Invite,
 	"/api/invite/accept":  InviteAccept,
-
-	// v1, used by the current frontend until v2 ships. /api/auth/me keeps its old shape.
-	"/api/auth/register":  Register,
-	"/api/auth/login":     Login,
-	"/api/auth/logout":    Logout,
-	"/api/auth/me":        Me,
-	"/api/wishlist":       Wishlist,
-	"/api/wishlist/items": WishlistItems,
 }
 
 // Mux serves Routes.

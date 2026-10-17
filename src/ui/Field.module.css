@@ -1,0 +1,96 @@
+.f {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.label em {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--t2);
+}
+
+.box {
+  position: relative;
+}
+
+.inp {
+  width: 100%;
+  height: var(--field-h);
+  border-radius: var(--r-field);
+  border: 1px solid var(--fb);
+  background: var(--card);
+  padding: 0 14px;
+  font: 500 15px/1 var(--body);
+  color: var(--ink);
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    background-color var(--t-fast),
+    border-color var(--t-fast),
+    box-shadow var(--t-fast);
+}
+
+textarea.inp {
+  height: 84px;
+  padding: 12px 14px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.inp::placeholder {
+  color: var(--t2);
+}
+
+.inp:hover {
+  border-color: var(--rule);
+}
+
+.inp:focus {
+  outline: none;
+  background: var(--raise);
+  border-color: var(--ink);
+  box-shadow: var(--focus-ring);
+}
+
+.inp[readonly] {
+  color: var(--t2);
+}
+
+.inp[aria-invalid='true'] {
+  border-color: var(--err);
+}
+
+.withPrefix {
+  padding-left: 52px;
+}
+
+.prefix {
+  position: absolute;
+  left: 14px;
+  top: 0;
+  height: var(--field-h);
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--t2);
+  pointer-events: none;
+}
+
+.help {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--t2);
+}
+
+.error {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--err);
+}

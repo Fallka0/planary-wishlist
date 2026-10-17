@@ -1,0 +1,141 @@
+/* Tag */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 99px;
+  background: var(--card);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t2);
+  white-space: nowrap;
+}
+
+.tag svg {
+  width: 13px;
+  height: 13px;
+}
+
+.tagOk {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+/* Avatar: filled for you, outlined for others */
+.av {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--btn);
+  color: var(--btn-fg);
+  display: inline-grid;
+  place-items: center;
+  font: 400 11px/1 var(--disp);
+  letter-spacing: -0.02em;
+}
+
+.avOther {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--rule-s);
+}
+
+.s26 {
+  width: 26px;
+  height: 26px;
+  font-size: 9px;
+}
+
+.s44 {
+  width: 44px;
+  height: 44px;
+  font-size: 13px;
+}
+
+.s64 {
+  width: 64px;
+  height: 64px;
+  font-size: 18px;
+}
+
+.stack {
+  display: flex;
+  padding-left: 6px;
+}
+
+.stack .av {
+  margin-left: -6px;
+  box-shadow:
+    0 0 0 2px var(--stack-ring, var(--card)),
+    inset 0 0 0 1px var(--rule-s);
+}
+
+.stack .av:not(.avOther) {
+  box-shadow: 0 0 0 2px var(--stack-ring, var(--card));
+}
+
+/* Tile: studio-light backdrop for a product picture or the fallback glyph */
+.tile {
+  display: grid;
+  place-items: center;
+  background: var(--tile-bg);
+  color: var(--tile-i);
+  overflow: hidden;
+}
+
+.tile > svg {
+  width: 42%;
+  height: 42%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
+.tile > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10%;
+  display: block;
+}
+
+/* Progress bar */
+.bar {
+  display: block;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ink);
+  transition: width 400ms var(--ease);
+}
+
+/* Skeleton */
+.sk {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--card-h) 0%, var(--rule) 50%, var(--card-h) 100%);
+  background-size: 200% 100%;
+  animation: sk 1.1s linear infinite;
+}
+
+@keyframes sk {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}

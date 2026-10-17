@@ -10,7 +10,7 @@ Team project under the Planary brand, where I was the lead developer.
 
 ## Features
 
-- Sign-in with the shared Planary account (auth.planary.ch, Supabase). The API checks the bearer token against Supabase.
+- Sign-in with the shared Planary account (auth.planary.ch). The app keeps the access token it hands back, renews it with the refresh token, and the API confirms it with planary-auth.
 - Wishlists and items stored in Postgres
 - **Link preview:** paste a URL and the backend reads Open Graph tags, JSON-LD and price hints from the page
 - Frontend and Go API deployed together as one Vercel project, so no CORS setup is needed
@@ -20,10 +20,15 @@ Version 2 is being built from the handoff in [`docs/wishlist-v2/`](docs/wishlist
 ## Architecture
 
 ```
-src/              React + Vite frontend
+src/
+  app/            shell: frame, top bar, sidebar, search, routes
+  pages/          one component per route
+  ui/             primitives (Button, Field, Dialog, Toast, …), CSS Modules
+  lib/            API client, session, formatting, theme
+  styles/         design tokens and the global reset
 api/router.go     the one Vercel Go function; vercel.json sends all /api/* here
 pkg/
-  auth/           Supabase bearer-token check, display name
+  auth/           planary-auth token check (cached briefly), display name
   db/             connection pool and migrations runner
     migrations/   numbered SQL files, applied in order on the first request
   app/            business logic, permissions and SQL; link preview with SSRF guard
@@ -35,7 +40,7 @@ cmd/local-api/    local Go server for development (same handlers as api/)
 docs/wishlist-v2/ design and implementation handoff for v2
 ```
 
-API: the v2 endpoints are specified in [`docs/wishlist-v2/api/API.md`](docs/wishlist-v2/api/API.md). Every route is listed once in `pkg/httpapi/routes.go`. `cmd/local-api` serves that table directly; on Vercel, `vercel.json` rewrites every `/api/*` request to the single function `api/router.go`, which dispatches through the same table. One function instead of one per route keeps the deployment under the Hobby plan's limit of 12 functions. The v1 routes (`/api/wishlist`, `/api/auth/*`) stay until the v2 frontend ships.
+API: the v2 endpoints are specified in [`docs/wishlist-v2/api/API.md`](docs/wishlist-v2/api/API.md). Every route is listed once in `pkg/httpapi/routes.go`. `cmd/local-api` serves that table directly; on Vercel, `vercel.json` rewrites every `/api/*` request to the single function `api/router.go`, which dispatches through the same table. One function instead of one per route keeps the deployment under the Hobby plan's limit of 12 functions.
 
 Migrations: every file in `pkg/db/migrations` runs once, in its own transaction behind an advisory lock, and is recorded in `schema_migrations`. Add a new numbered file for any schema change; never edit one that has shipped.
 
@@ -47,7 +52,7 @@ The code worked, but the product did not take off: we built before checking clea
 
 ```bash
 npm install
-cp .env.example .env    # set DATABASE_URL and the Supabase keys
+cp .env.example .env    # set DATABASE_URL
 npm run api:dev         # Go API on :8080
 npm run dev             # frontend, proxies /api to :8080
 ```

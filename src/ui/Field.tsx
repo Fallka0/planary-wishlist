@@ -30,15 +30,26 @@ function Messages({ id, help, error }: { id: string; help?: ReactNode; error?: R
   );
 }
 
-/** Labelled text input with optional help text and an error. */
-export function TextField({ label, help, error, className, ...input }: FieldProps & InputHTMLAttributes<HTMLInputElement>) {
+/**
+ * Labelled text input with optional help text and an error. An addon (a button) sits next to the
+ * input, with the help and error below both.
+ */
+export function TextField({ label, help, error, addon, className, ...input }: FieldProps & { addon?: ReactNode } & InputHTMLAttributes<HTMLInputElement>) {
   const { id, describedBy } = useFieldIds(error, help);
+  const field = <input id={id} className={styles.inp} aria-invalid={error ? true : undefined} aria-describedby={describedBy} {...input} />;
   return (
     <div className={[styles.f, className].filter(Boolean).join(' ')}>
       <label className={styles.label} htmlFor={id}>
         {label}
       </label>
-      <input id={id} className={styles.inp} aria-invalid={error ? true : undefined} aria-describedby={describedBy} {...input} />
+      {addon ? (
+        <div className={styles.withAddon}>
+          {field}
+          {addon}
+        </div>
+      ) : (
+        field
+      )}
       <Messages id={id} help={help} error={error} />
     </div>
   );

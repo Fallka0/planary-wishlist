@@ -3,20 +3,11 @@ import { ChoiceGrid, KindChoice, useNewList } from '../app/NewList';
 import { useOverview } from '../app/Shell';
 import { comingUp } from '../lib/comingUp';
 import { formatDate, formatDayMonth, nextOccurrence, pluralise, todayInZurich } from '../lib/format';
-import type { Occasion, OverviewResponse } from '../lib/types';
+import { nextOf } from '../lib/occasions';
+import type { OverviewResponse } from '../lib/types';
 import { Avatar, AvatarStack, Button, Icon, ProgressBar, Skeleton, Tag, Tile } from '../ui';
 import page from './Page.module.css';
 import styles from './OverviewPage.module.css';
-
-/** The soonest upcoming occasion, with its date. */
-function nextOf(occasions: Occasion[], today: Date) {
-  let best: { occ: Occasion; date: Date } | null = null;
-  for (const occ of occasions) {
-    const date = nextOccurrence(occ, today);
-    if (date && (!best || date < best.date)) best = { occ, date };
-  }
-  return best;
-}
 
 function ComingUp({ data, today }: { data: OverviewResponse; today: Date }) {
   const cards = comingUp(data, today).slice(0, 3);

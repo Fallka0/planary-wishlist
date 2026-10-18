@@ -1,0 +1,29 @@
+/* Plan together: who's on the list */
+.people {
+  border-top: 1px solid var(--rule);
+}
+
+.people li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.who {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.name {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.role {
+  font-size: 13px;
+  color: var(--t2);
+}

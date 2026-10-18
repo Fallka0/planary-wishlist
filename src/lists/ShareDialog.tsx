@@ -1,19 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useId, useRef, useState } from 'react';
 import { api } from '../lib/api';
+import { copyText } from '../lib/clipboard';
 import { keys } from '../lib/queryClient';
 import type { ShareState, WishListDetail } from '../lib/types';
 import { Button, Dialog, Icon, Switch, TextField, useToast } from '../ui';
 import styles from './Lists.module.css';
-
-async function copyText(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /** Share a wishlist by link (SCREENS.md §5). */
 export function ShareDialog({ list, onClose }: { list: WishListDetail; onClose: () => void }) {

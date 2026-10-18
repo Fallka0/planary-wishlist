@@ -116,7 +116,7 @@ Token: 16 random bytes, base64url (no padding). First enable creates it. Disabli
 
 - Token unknown or sharing off → `404 code: "link_off"` (UI: "This link doesn't work anymore").
 - Signed-in non-owner viewer: upsert `list_followers` (this fills "Shared with me"). `status` is `mine` for their own reservations.
-- Guest: `email` required for reserving. Response carries `undoToken` (32 random bytes base64url); store only its sha256 in `reservations.undo_token_hash`. When email delivery is on, also mail a link `/w/<token>?undo=<undoToken>` (BRIEF open question 1).
+- Guest: `email` required for reserving. Response carries `undoToken` (32 random bytes base64url); store only its sha256 in `reservations.undo_token_hash`. When email delivery is on, also mail a link `/w/<token>?undo=<undoToken>&item=<itemId>` (BRIEF open question 1; the page needs the item id for the DELETE).
 - Guests see their own reservations as `taken`; the client upgrades them to `mine` from the undo tokens in localStorage.
 - **Owner viewing their own link:** `viewer.isOwner = true` and every item has `status: "hidden"`. The page shows a banner instead of reserve buttons.
 - Simple abuse guard: max 20 reservations per IP per hour (an in-memory map is fine on Vercel; best effort).

@@ -504,7 +504,13 @@ func TestOverviewAndSearch(t *testing.T) {
 		expect(t, call(t, noa, "PUT", "/api/picks", map[string]any{"itemId": id, "occasionId": occ, "picked": true}), 200, "pick")
 	}
 
+	expect(t, call(t, noa, "POST", "/api/members", map[string]any{"listId": mom, "email": "jonas.brunner@example.ch"}), 201, "invite")
+
 	res := expect(t, call(t, noa, "GET", "/api/overview", nil), 200, "overview")
+	// A pending invite shows in the co-planner stack, named by its email until they join.
+	if res.str("people", "0", "coPlanners", "0", "name") != "jonas.brunner" || res.str("people", "0", "coPlanners", "0", "initials") != "JB" {
+		t.Fatalf("coPlanners = %s", res.raw)
+	}
 	if res.str("lists", "0", "itemCount") != "5" || len(res.get("lists", "0", "previews").([]any)) != 4 || res.get("lists", "0", "shared") != false {
 		t.Fatalf("lists = %s", res.raw)
 	}

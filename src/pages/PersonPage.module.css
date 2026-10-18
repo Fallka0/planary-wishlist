@@ -157,11 +157,6 @@ li.irow {
   cursor: pointer;
 }
 
-li:first-child > .orow {
-  border-top: 0;
-  padding-top: 4px;
-}
-
 .orow > svg {
   color: var(--t2);
 }

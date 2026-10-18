@@ -64,7 +64,8 @@ export function MenuButton({ label, icon = 'more', items }: { label: string; ico
               role="menuitem"
               className={[styles.item, item.danger && styles.danger].filter(Boolean).join(' ')}
               onClick={() => {
-                setOpen(false);
+                // Focus goes back to the trigger first, so a dialog the item opens returns it there.
+                close();
                 item.onSelect();
               }}
             >

@@ -1,0 +1,11 @@
+# Local development only (`npm run dev` here, or `npm run api:dev` in the repo root).
+# Copy to .dev.vars. Deployed values live in wrangler.jsonc ("vars") and Cloudflare secrets.
+
+# Locally the AUTH service binding has no planary-auth to talk to, so tokens are checked over HTTPS.
+AUTH_API_URL=https://auth.planary.ch
+# Empty: share and invite links use the address you opened the app at (Vite on :5376).
+PUBLIC_APP_URL=
+
+# Optional email for co-planner invites and guests' undo links (Resend). Unset = no email; the app
+# shows and copies the links instead. In production: `npx wrangler secret put RESEND_API_KEY`.
+RESEND_API_KEY=

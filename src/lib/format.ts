@@ -1,5 +1,5 @@
 // Swiss formatting for money, dates and counts (docs/wishlist-v2/SCREENS.md, "Formatting rules").
-// Date logic matches pkg/app/dates.go; both have the same test cases.
+// Date logic matches worker/src/dates.ts; both have the same test cases.
 
 const THOUSANDS = '’'; // ’
 const EN_DASH = '–'; // –

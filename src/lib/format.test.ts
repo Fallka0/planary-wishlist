@@ -57,7 +57,7 @@ describe('parsePrice', () => {
   });
 });
 
-// Same cases as TestNextOccurrence in pkg/app/parse_test.go.
+// Same cases as the Worker's date tests in worker/test/unit.test.ts.
 describe('nextOccurrence', () => {
   it.each([
     ['later this year', 11, 2, null, '2026-10-16', '2026-11-02'],

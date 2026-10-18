@@ -1,6 +1,6 @@
 // Planary Wishlist v2 · API types, copied from docs/wishlist-v2/api/api-types.ts.
-// The Go structs in pkg/models serialise to exactly these shapes.
-// Ids are numbers (BIGSERIAL), user ids are Planary account UUID strings, money is integer cents.
+// The Worker (worker/src) imports these types for its responses.
+// Ids are numbers (D1 row ids), user ids are Planary account UUID strings, money is integer cents.
 
 export type UserId = string;
 export type Priority = 1 | 2 | 3; // 1 must have · 2 would love · 3 nice to have

@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // One Worker serves wishlist.planary.ch: the web app's files and the API under /api.
+  "name": "planary-wishlist",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-09-01",
+  // The web app, built by `npm run build` in the repo root. Requests for /api/* reach the Worker;
+  // everything else is a file from dist, or index.html for the app's own routes.
+  "assets": {
+    "directory": "../dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  // No database_id: the first deploy creates the database, later commands find it by name.
+  "d1_databases": [{ "binding": "DB", "database_name": "planary-wishlist", "migrations_dir": "migrations" }],
+  // Checks sign-in tokens by asking planary-auth directly, worker to worker.
+  "services": [{ "binding": "AUTH", "service": "planary-auth" }],
+  "routes": [{ "pattern": "wishlist.planary.ch", "custom_domain": true }],
+  "vars": {
+    // Base for share links (/w/<token>) and invite links (/invite/<token>).
+    "PUBLIC_APP_URL": "https://wishlist.planary.ch",
+    "MAIL_FROM": "Planary <noreply@planary.ch>"
+  },
+  "observability": { "enabled": true }
+}

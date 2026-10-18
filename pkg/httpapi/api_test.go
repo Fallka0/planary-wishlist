@@ -40,13 +40,13 @@ func TestMain(m *testing.M) {
 	os.Setenv("PUBLIC_APP_URL", "https://wishlist.test")
 	dbReady = true
 
-	// "Bearer test|<uuid>|<email>|<name>" stands in for a Supabase token.
+	// "Bearer test|<uuid>|<email>|<name>" stands in for a planary-auth token.
 	authenticate = func(r *http.Request) (auth.User, error) {
 		parts := strings.Split(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "), "|")
 		if len(parts) != 4 || parts[0] != "test" {
 			return auth.User{}, errors.New("bad token")
 		}
-		return auth.User{ID: parts[1], Email: parts[2], UserMetadata: map[string]any{"full_name": parts[3]}}, nil
+		return auth.User{ID: parts[1], Email: parts[2], Name: parts[3]}, nil
 	}
 
 	code = m.Run()

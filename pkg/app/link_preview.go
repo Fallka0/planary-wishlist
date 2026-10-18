@@ -83,10 +83,6 @@ func truncateRunes(s string, n int) string {
 	return strings.TrimSpace(string(r[:n]))
 }
 
-func fetchLinkMetadata(ctx context.Context, rawURL string) (linkMetadata, error) {
-	return fetchLinkMetadataWith(ctx, defaultPolicy, safeClient, rawURL)
-}
-
 func fetchLinkMetadataWith(ctx context.Context, p fetchPolicy, client *http.Client, rawURL string) (linkMetadata, error) {
 	normalizedURL, err := normalizeLinkURL(rawURL)
 	if err != nil {

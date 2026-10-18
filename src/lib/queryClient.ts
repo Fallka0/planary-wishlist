@@ -17,4 +17,5 @@ export const keys = {
   overview: ['overview'] as const,
   list: (id: number) => ['list', id] as const,
   search: (q: string) => ['search', q] as const,
+  shared: (token: string) => ['shared', token] as const,
 };

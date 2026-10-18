@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -272,7 +273,8 @@ func sendUndoMail(ctx context.Context, to string, l sharedList, item models.Publ
 	if !Mailer.Enabled() {
 		return
 	}
-	link := strings.TrimRight(baseURL, "/") + "/w/" + shareToken + "?undo=" + undo
+	// The page needs the item to undo; the token alone proves it's yours.
+	link := strings.TrimRight(baseURL, "/") + "/w/" + shareToken + "?undo=" + undo + "&item=" + strconv.FormatInt(item.ID, 10)
 	err := Mailer.Send(ctx, mailer.Message{
 		To:      to,
 		Subject: "You're getting " + item.Name,

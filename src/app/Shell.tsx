@@ -21,8 +21,25 @@ function useMyName(overview?: OverviewResponse) {
   return overview?.me.displayName || getSession()?.name || '';
 }
 
-function TopBar({ menuOpen, onMenu }: { menuOpen: boolean; onMenu: () => void }) {
+/** "Planary | Wishlist" at the left of the top bar. */
+export function Brand() {
+  return (
+    <div className={styles.brand}>
+      <a className={styles.wm} href="https://planary.ch">
+        <PlanaryMark className={styles.mark} />
+        <span>Planary</span>
+      </a>
+      <span className={styles.app}>Wishlist</span>
+    </div>
+  );
+}
+
+export function ThemeButton() {
   const [theme, toggleTheme] = useTheme();
+  return <IconButton icon={theme === 'dark' ? 'sun' : 'moon'} label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={toggleTheme} />;
+}
+
+function TopBar({ menuOpen, onMenu }: { menuOpen: boolean; onMenu: () => void }) {
   const [searching, setSearching] = useState(false);
   const { data } = useOverview();
   const name = useMyName(data);
@@ -37,17 +54,11 @@ function TopBar({ menuOpen, onMenu }: { menuOpen: boolean; onMenu: () => void })
         aria-controls="lists"
         onClick={onMenu}
       />
-      <div className={styles.brand}>
-        <a className={styles.wm} href="https://planary.ch">
-          <PlanaryMark className={styles.mark} />
-          <span>Planary</span>
-        </a>
-        <span className={styles.app}>Wishlist</span>
-      </div>
+      <Brand />
       <SearchBox />
       <div className={styles.right}>
         <IconButton icon="search" label="Search" className={styles.phoneOnly} onClick={() => setSearching(true)} />
-        <IconButton icon={theme === 'dark' ? 'sun' : 'moon'} label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={toggleTheme} />
+        <ThemeButton />
         <a className={styles.avatarLink} href={accountUrl()} aria-label={`Your Planary account, ${name}`}>
           <Avatar name={name} me />
         </a>

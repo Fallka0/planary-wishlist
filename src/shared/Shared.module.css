@@ -1,0 +1,241 @@
+/* A shared wishlist as friends see it (SCREENS.md §8) */
+.page {
+  padding: 48px 40px 72px;
+}
+
+.page:focus {
+  outline: none;
+}
+
+.loadingTitle {
+  margin-top: 22px;
+}
+
+.vis {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.own {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.h1 {
+  font-family: var(--disp);
+  font-weight: 300;
+  letter-spacing: var(--disp-tracking);
+  font-size: clamp(40px, 5cqw, 72px);
+  line-height: 0.98;
+  margin-left: -0.03em;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--t2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+}
+
+.meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 28px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--card);
+  font-size: 14px;
+  max-width: 640px;
+}
+
+.hint svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.none {
+  margin-top: 28px;
+  color: var(--t2);
+}
+
+/* Cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: 28px 18px;
+  margin-top: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+}
+
+.tile {
+  aspect-ratio: 1;
+  border-radius: 16px;
+}
+
+.cardBody {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.name {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--t2);
+}
+
+.price {
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.note {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--t2);
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.reserve {
+  flex: 1;
+}
+
+.taken > .tile {
+  opacity: 0.45;
+}
+
+.taken .name,
+.taken .price {
+  color: var(--t2);
+}
+
+/* Public page footer */
+.foot {
+  max-width: 1120px;
+  margin: 56px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  color: var(--t2);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.foot a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.foot a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Reserve and undo dialogs */
+.resItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--card);
+}
+
+.resTile {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  border-radius: 12px;
+}
+
+.signIn {
+  font-size: 13px;
+  color: var(--t2);
+}
+
+.linkBtn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@container site (max-width: 760px) {
+  .page {
+    padding: 28px 16px 56px;
+  }
+
+  .h1 {
+    font-size: 40px;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 12px;
+  }
+
+  .cardBody {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .price {
+    text-align: left;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+}

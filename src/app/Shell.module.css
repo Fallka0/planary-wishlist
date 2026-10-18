@@ -273,8 +273,14 @@
     gap: 10px;
   }
 
+  /* Only the mark shows; the name stays for screen readers. */
   .wm > span {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
   .app {

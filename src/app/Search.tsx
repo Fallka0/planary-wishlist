@@ -117,7 +117,6 @@ export function SearchBox() {
         placeholder="Search lists and ideas"
         value={text}
         aria-controls={showing ? id : undefined}
-        aria-expanded={Boolean(showing)}
         onChange={(e) => {
           setText(e.target.value);
           setOpen(true);

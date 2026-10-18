@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"planary-wishlist/pkg/auth"
 	"planary-wishlist/pkg/db"
@@ -133,6 +135,7 @@ ORDER BY MAX(f.created_at) DESC, l.id`, me)
 	cents := map[int64]map[int64]int64{}
 	counts := map[int64]map[int64]int{}
 	planners := map[int64][]string{}
+	invited := map[int64][]models.PersonRef{}
 	if len(personIDs) > 0 {
 		rows, err = pool.Query(ctx, `
 SELECT o.list_id, o.id, COALESCE(SUM(i.price_cents) FILTER (WHERE i.currency = 'CHF'), 0), COUNT(*)
@@ -161,18 +164,25 @@ GROUP BY o.list_id, o.id`, personIDs)
 			return out, err
 		}
 
-		// Co-planners: active members, plus the owner when I'm a member. Never me.
+		// Co-planners: active members, plus the owner when I'm a member. Never me. Invites that
+		// haven't been accepted come last, named by their email (like the person page).
 		rows, err = pool.Query(ctx, `
-SELECT list_id, user_id::text FROM list_members WHERE list_id = ANY($1) AND status = 'active' ORDER BY joined_at, id`, personIDs)
+SELECT list_id, id, COALESCE(user_id::text, ''), email FROM list_members WHERE list_id = ANY($1)
+ORDER BY status = 'invited', joined_at, id`, personIDs)
 		if err != nil {
 			return out, err
 		}
 		for rows.Next() {
-			var listID int64
-			var userID string
-			if err := rows.Scan(&listID, &userID); err != nil {
+			var listID, memberID int64
+			var userID, email string
+			if err := rows.Scan(&listID, &memberID, &userID, &email); err != nil {
 				rows.Close()
 				return out, err
+			}
+			if userID == "" {
+				local, _, _ := strings.Cut(email, "@")
+				invited[listID] = append(invited[listID], personRef(fmt.Sprintf("invite-%d", memberID), local, me))
+				continue
 			}
 			planners[listID] = append(planners[listID], userID)
 		}
@@ -208,6 +218,7 @@ SELECT list_id, user_id::text FROM list_members WHERE list_id = ANY($1) AND stat
 				s.CoPlanners = append(s.CoPlanners, refs[id])
 			}
 		}
+		s.CoPlanners = append(s.CoPlanners, invited[s.ID]...)
 	}
 	for i := range out.Shared {
 		out.Shared[i].Owner = refs[out.Shared[i].Owner.ID]

@@ -33,9 +33,10 @@ const FOCUSABLE =
 export function useModal(ref: RefObject<HTMLElement | null>, onClose: () => void, initialFocus?: RefObject<HTMLElement | null>) {
   const close = useRef(onClose);
   close.current = onClose;
+  // Read while rendering: by the time effects run, an autoFocus field inside may already have focus.
+  const [opener] = useState(() => document.activeElement as HTMLElement | null);
 
   useEffect(() => {
-    const opener = document.activeElement as HTMLElement | null;
     const el = ref.current;
     if (!el) return;
 

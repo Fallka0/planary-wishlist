@@ -126,3 +126,14 @@ textarea.inp {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Input with a button next to it ("Invite"). */
+.withAddon {
+  display: flex;
+  gap: 8px;
+}
+
+.withAddon > input {
+  flex: 1;
+  min-width: 0;
+}

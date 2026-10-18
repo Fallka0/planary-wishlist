@@ -53,7 +53,7 @@ export function EditItemDrawer({
   return (
     <Drawer
       title="Edit item"
-      subtitle={`On ${listTitle}`}
+      subtitle={kind === 'wish' ? `On ${listTitle}` : `Idea for ${listTitle}`}
       onClose={onClose}
       onSubmit={() => {
         const { errors: found, priceCents } = validateDraft(draft);

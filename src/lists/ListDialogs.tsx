@@ -172,23 +172,26 @@ export function OccasionDialog({
   );
 }
 
-/** "Delete <title>? This removes its 9 items and turns off its link." */
+/** "Delete <title>? This removes its 9 items and turns off its link." (or "its 6 ideas") */
 export function DeleteListDialog({
   title,
   itemCount,
+  noun = 'item',
   shared,
   onClose,
   onDelete,
 }: {
   title: string;
   itemCount: number;
+  /** What the list holds: "item" on wishlists, "idea" on gift idea lists. */
+  noun?: string;
   shared: boolean;
   onClose: () => void;
   onDelete: () => Promise<unknown>;
 }) {
   const [error, setError] = useState('');
   const del = useMutation({ mutationFn: onDelete, onError: (e) => setError(errorText(e)) });
-  const what = itemCount > 0 ? `This removes its ${pluralise(itemCount, 'item')}` : 'This removes the list';
+  const what = itemCount > 0 ? `This removes its ${pluralise(itemCount, noun)}` : 'This removes the list';
   return (
     <Dialog
       title={`Delete ${title}?`}

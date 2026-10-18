@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { api } from '../lib/api';
-import { countdownShort, daysBetween, nextOccurrence, todayInZurich } from '../lib/format';
+import { countdown, countdownShort, daysBetween, nextOccurrence, todayInZurich } from '../lib/format';
 import { keys } from '../lib/queryClient';
 import { accountUrl, getSession } from '../lib/session';
 import { useTheme } from '../lib/theme';
 import type { Occasion, OverviewResponse } from '../lib/types';
 import { Avatar, Button, Icon, IconButton, PlanaryMark, Skeleton, useModal } from '../ui';
+import { NewListProvider, useNewList } from './NewList';
 import { SearchBox, SearchSheet } from './Search';
 import styles from './Shell.module.css';
 
@@ -80,6 +81,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { data, isPending, isError } = useOverview();
   const name = useMyName(data);
   const sheet = useRef<HTMLElement>(null);
+  const openNew = useNewList();
 
   return (
     <nav id="lists" ref={sheet} className={[styles.side, open && styles.open].filter(Boolean).join(' ')} aria-label="Your lists" tabIndex={-1}>
@@ -88,8 +90,10 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         <span className={styles.sideTitle}>Lists</span>
         <IconButton icon="x" label="Close lists" onClick={onClose} />
       </div>
-      {/* Opens the New list dialog (phase 3). */}
-      <Button icon="plus" wide className={styles.newList}>
+      <Button icon="plus" wide className={styles.newList} onClick={() => {
+          onClose();
+          openNew();
+        }}>
         New list
       </Button>
       <NavLink to="/app" end className={styles.item}>
@@ -133,8 +137,9 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
                   <Avatar name={p.personFullName || p.title} size={26} />
                   <span className={styles.itemText}>{p.title}</span>
                   {days !== null && (
-                    <span className={styles.itemCount} aria-label={days === 0 ? 'today' : `in ${days} days`}>
-                      {countdownShort(days)}
+                    <span className={styles.itemCount}>
+                      <span aria-hidden="true">{countdownShort(days)}</span>
+                      <span className="sr-only">, {countdown(days)}</span>
                     </span>
                   )}
                 </NavLink>
@@ -173,7 +178,7 @@ export function Shell() {
   useEffect(() => setMenuOpen(false), [location.pathname]);
 
   return (
-    <>
+    <NewListProvider>
       <TopBar menuOpen={menuOpen} onMenu={() => setMenuOpen(true)} />
       <div className={styles.shell}>
         <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
@@ -181,6 +186,6 @@ export function Shell() {
           <Outlet />
         </main>
       </div>
-    </>
+    </NewListProvider>
   );
 }

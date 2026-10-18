@@ -94,3 +94,35 @@ textarea.inp {
   font-weight: 600;
   color: var(--err);
 }
+
+.select {
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.chev {
+  position: absolute;
+  right: 14px;
+  top: 15px;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: var(--t2);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* Two fields side by side (price + priority), stacked on phones. */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 16px;
+}
+
+@container site (max-width: 760px) {
+  .pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

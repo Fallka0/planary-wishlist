@@ -1,0 +1,98 @@
+/* Page heads and sections shared by the app's pages. */
+.ph {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+}
+
+.crumb {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t2);
+  margin-bottom: 8px;
+}
+
+.crumb a {
+  text-decoration: none;
+}
+
+.h1 {
+  font-family: var(--disp);
+  font-weight: 300;
+  letter-spacing: var(--disp-tracking);
+  font-size: var(--fs-h1);
+  line-height: 1.05;
+  margin-left: -0.03em;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--t2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+}
+
+.meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sec {
+  margin-top: 44px;
+}
+
+.secHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.h2 {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.secSub {
+  font-size: 13px;
+  color: var(--t2);
+}
+
+.lead {
+  margin-top: 14px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--t2);
+  max-width: 52ch;
+}
+
+.fine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--t2);
+}
+
+@container site (max-width: 760px) {
+  .actions {
+    width: 100%;
+  }
+}

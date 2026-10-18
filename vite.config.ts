@@ -6,7 +6,8 @@ export default defineConfig({
   server: {
     port: 5376,
     proxy: {
-      '/api': 'http://localhost:8080',
+      // Keep the browser's Host so share and invite links point at the app, not at :8080.
+      '/api': { target: 'http://localhost:8080', changeOrigin: false },
     },
   },
 });

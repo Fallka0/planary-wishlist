@@ -1,0 +1,302 @@
+/* Quick add bar */
+.addbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  padding: 6px 6px 6px 18px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  border: 1px solid var(--fb);
+  transition:
+    box-shadow var(--t-fast),
+    background-color var(--t-fast);
+}
+
+.addbar:focus-within {
+  background: var(--raise);
+  box-shadow:
+    0 0 0 1px var(--ink),
+    0 0 0 4px rgba(139, 92, 246, 0.3);
+}
+
+.addbar > svg {
+  color: var(--t2);
+}
+
+.addbar input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: 0;
+  background: none;
+  font: 500 15px/1 var(--body);
+  color: var(--ink);
+  padding: 0 4px;
+}
+
+.addbar input::placeholder {
+  color: var(--t2);
+}
+
+.addbar input:focus {
+  outline: none;
+}
+
+/* Toolbar */
+.tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.toolsRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Rows */
+.rows {
+  margin-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 150px 110px 44px;
+  grid-template-areas: 't m s p a';
+  align-items: center;
+  gap: 18px;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.rowTile {
+  grid-area: t;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--r-tile-s);
+}
+
+.rowMain {
+  grid-area: m;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--t2);
+}
+
+.sub a {
+  color: var(--t2);
+}
+
+.prio {
+  grid-area: s;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--t2);
+}
+
+.dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rule);
+}
+
+.dots i.filled {
+  background: var(--ink);
+}
+
+.price {
+  grid-area: p;
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rowAct {
+  grid-area: a;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.isNew {
+  animation: newin 1800ms var(--ease);
+}
+
+@keyframes newin {
+  0% {
+    background: rgba(139, 92, 246, 0.18);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+/* Grid */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: 28px 18px;
+  margin-top: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-card);
+}
+
+.cardTile {
+  aspect-ratio: 1;
+  border-radius: var(--r-tile);
+}
+
+.cardBody {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.cardAct {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+/* Empty list */
+.empty {
+  margin-top: 28px;
+  padding: 56px 24px;
+  border-radius: 24px;
+  border: 1px dashed var(--rule-s);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.emptyTile {
+  width: 96px;
+  height: 96px;
+  border-radius: 24px;
+  margin-bottom: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--tile-bg);
+  color: var(--tile-i);
+}
+
+.emptyTile svg {
+  width: 42%;
+  height: 42%;
+  stroke-width: 1.15;
+}
+
+.empty h2 {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.empty p {
+  max-width: 44ch;
+  color: var(--t2);
+}
+
+@container site (max-width: 760px) {
+  .tools {
+    gap: 10px;
+  }
+
+  .chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 -16px;
+    padding: 0 16px;
+    scrollbar-width: none;
+  }
+
+  .chips > * {
+    flex: none;
+  }
+
+  .toolsRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .row {
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    grid-template-areas: 't m p' 't s a';
+    gap: 4px 14px;
+    padding: 12px 0;
+  }
+
+  .rowTile {
+    width: 56px;
+    height: 56px;
+    align-self: start;
+  }
+
+  .rowAct {
+    margin-top: -8px;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 12px;
+  }
+
+  .cardBody {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .card .price {
+    text-align: left;
+  }
+
+  .cardAct > * {
+    width: 100%;
+  }
+}
+
+.loadingTitle {
+  margin-top: 14px;
+}

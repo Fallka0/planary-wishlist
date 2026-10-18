@@ -1,0 +1,240 @@
+/* Coming up */
+.occ {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: 16px;
+}
+
+.oc {
+  width: 100%;
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  text-align: left;
+  text-decoration: none;
+  transition: background-color var(--t-fast);
+}
+
+.oc:hover {
+  background: var(--card-h);
+}
+
+.ocTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ocTitle {
+  display: block;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.ocDate {
+  display: block;
+  font-size: 13px;
+  color: var(--t2);
+  margin-top: 2px;
+}
+
+.ocDays {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.ocNum {
+  font-size: var(--fs-count);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+}
+
+.ocUnit {
+  font-size: 13px;
+  color: var(--t2);
+}
+
+.ocFoot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--t2);
+  margin-top: -8px;
+}
+
+/* My wishlists */
+.lgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: 24px 16px;
+}
+
+.lc {
+  display: block;
+  text-decoration: none;
+}
+
+.mos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  border-radius: var(--r-tile);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  transition: transform 200ms var(--ease);
+}
+
+.lc:hover .mos {
+  transform: translateY(-3px);
+}
+
+.mos > span {
+  border-radius: 0;
+}
+
+.mos > span > svg {
+  width: 46%;
+  height: 46%;
+}
+
+.blank {
+  background: var(--tile-bg);
+}
+
+.lcTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.lcSub {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--t2);
+}
+
+/* Gift ideas */
+.pgr {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  gap: 16px;
+}
+
+.pc {
+  width: 100%;
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  text-decoration: none;
+  transition: background-color var(--t-fast);
+}
+
+.pc:hover {
+  background: var(--card-h);
+}
+
+.pcTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pcName {
+  display: block;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.pcSub {
+  display: block;
+  font-size: 13px;
+  color: var(--t2);
+}
+
+.pcFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--t2);
+  min-height: 26px;
+}
+
+/* Shared with me */
+.srows {
+  border-top: 1px solid var(--rule);
+}
+
+.srow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+}
+
+.srow:hover .srowTitle {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.srowMain {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.srowTitle {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.srowSub {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--t2);
+}
+
+.srowDate {
+  font-size: 13px;
+  color: var(--t2);
+}
+
+/* First run */
+.first {
+  max-width: 880px;
+  padding-top: 40px;
+}
+
+.firstChoices {
+  margin-top: 36px;
+}
+
+.error {
+  margin-top: 28px;
+  color: var(--t2);
+}
+
+@container site (max-width: 760px) {
+  .lgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+  }
+}

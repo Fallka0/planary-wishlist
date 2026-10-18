@@ -1,0 +1,68 @@
+.swRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--card);
+}
+
+.swTitle {
+  font-weight: 700;
+}
+
+.swSub {
+  font-size: 13px;
+  color: var(--t2);
+}
+
+.copy {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.copy > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.facts {
+  display: grid;
+  gap: 12px;
+}
+
+.facts li {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.facts svg {
+  margin-top: 1px;
+  color: var(--t2);
+}
+
+.dateRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+@container site (max-width: 760px) {
+  .dateRow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .dateRow > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.formError {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--err);
+}

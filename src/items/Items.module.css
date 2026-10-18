@@ -1,0 +1,120 @@
+/* Preview card: what the link preview found, or the item being edited */
+.pv {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--r-card);
+  background: var(--card);
+}
+
+.pvTile {
+  width: 112px;
+  height: 112px;
+  border-radius: var(--r-tile-s);
+}
+
+.pvSource {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t2);
+}
+
+.pvName {
+  margin-top: 6px;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.pvPrice {
+  margin-top: 6px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* "Reading galaxus.ch…" */
+.url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  font-size: 13px;
+  color: var(--t2);
+}
+
+.url span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skLines {
+  display: grid;
+  gap: 10px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--t2);
+}
+
+.spin {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--rule);
+  border-top-color: var(--ink);
+  animation: spin 700ms linear infinite;
+  flex: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* Error and info notes inside dialogs */
+.note {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.note svg {
+  margin-top: 1px;
+}
+
+.err {
+  background: var(--err-bg);
+  color: var(--err);
+}
+
+@container site (max-width: 760px) {
+  .pv {
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .pvTile {
+    width: 84px;
+    height: 84px;
+  }
+}

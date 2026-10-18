@@ -1,0 +1,72 @@
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 16px;
+}
+
+.choice {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  align-content: start;
+  padding: 20px 20px 24px;
+  border-radius: 22px;
+  border: 1px solid var(--rule);
+  background: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color var(--t-fast),
+    background-color var(--t-fast),
+    transform 200ms var(--ease);
+}
+
+.choice:hover {
+  border-color: var(--ink);
+  transform: translateY(-2px);
+}
+
+.choice[aria-pressed='true'] {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.choiceTitle {
+  font-family: var(--disp);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.choiceSmall .choiceTitle {
+  font-size: 18px;
+}
+
+.choiceSub {
+  font-size: 14px;
+  color: var(--t2);
+  max-width: 36ch;
+}
+
+.choiceTile {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--tile-bg);
+  color: var(--tile-i);
+}
+
+.choiceTile svg {
+  width: 22%;
+  height: 40%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

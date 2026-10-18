@@ -4,7 +4,7 @@ Wishlists for the things you want, and private gift-idea lists for the people yo
 
 Team project under the Planary brand, where I was the lead developer.
 
-**Live:** [planary-wishlist.vercel.app](https://planary-wishlist.vercel.app)
+**Live:** [wishlist.planary.ch](https://wishlist.planary.ch)
 
 ![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white) ![React](https://img.shields.io/badge/React-20232A?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
 

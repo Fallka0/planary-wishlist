@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { IconButton } from './Button';
 import styles from './Overlay.module.css';
@@ -80,6 +80,13 @@ export function useModal(ref: RefObject<HTMLElement | null>, onClose: () => void
   }, [ref]);
 }
 
+/** When the content changes and the focused element disappears, keep focus inside the overlay. */
+function useKeepFocus(ref: RefObject<HTMLElement | null>) {
+  useLayoutEffect(() => {
+    if (document.activeElement === document.body || document.activeElement === null) ref.current?.focus();
+  });
+}
+
 interface OverlayProps {
   title: ReactNode;
   subtitle?: ReactNode;
@@ -87,6 +94,31 @@ interface OverlayProps {
   footer?: ReactNode;
   children?: ReactNode;
   initialFocus?: RefObject<HTMLElement | null>;
+  /** Makes body and footer one form, so Enter and a submit button in the footer work. */
+  onSubmit?: (e: FormEvent<HTMLFormElement>) => void;
+}
+
+/** Body and footer, wrapped in a form when the overlay submits something. */
+function Content({ children, footer, onSubmit }: Pick<OverlayProps, 'children' | 'footer' | 'onSubmit'>) {
+  const inner = (
+    <>
+      {children && <div className={styles.body}>{children}</div>}
+      {footer && <div className={styles.foot}>{footer}</div>}
+    </>
+  );
+  if (!onSubmit) return inner;
+  return (
+    <form
+      className={styles.form}
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(e);
+      }}
+    >
+      {inner}
+    </form>
+  );
 }
 
 function Head({ titleId, subtitleId, title, subtitle, onClose }: { titleId: string; subtitleId: string } & Pick<OverlayProps, 'title' | 'subtitle' | 'onClose'>) {
@@ -108,10 +140,11 @@ function Head({ titleId, subtitleId, title, subtitle, onClose }: { titleId: stri
 }
 
 /** Centred dialog; a bottom sheet under 760px. Clicking the scrim closes it. */
-export function Dialog({ title, subtitle, onClose, footer, children, initialFocus, wide }: OverlayProps & { wide?: boolean }) {
+export function Dialog({ title, subtitle, onClose, footer, children, initialFocus, onSubmit, wide }: OverlayProps & { wide?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const id = useId();
   useModal(ref, onClose, initialFocus);
+  useKeepFocus(ref);
   return usePortal(
     <div
       className={styles.scrim}
@@ -129,18 +162,20 @@ export function Dialog({ title, subtitle, onClose, footer, children, initialFocu
         tabIndex={-1}
       >
         <Head titleId={`${id}-t`} subtitleId={`${id}-s`} title={title} subtitle={subtitle} onClose={onClose} />
-        {children && <div className={styles.body}>{children}</div>}
-        {footer && <div className={styles.foot}>{footer}</div>}
+        <Content footer={footer} onSubmit={onSubmit}>
+          {children}
+        </Content>
       </div>
     </div>,
   );
 }
 
 /** Right-hand drawer over a light scrim; a bottom sheet under 760px. */
-export function Drawer({ title, subtitle, onClose, footer, children, initialFocus }: OverlayProps) {
+export function Drawer({ title, subtitle, onClose, footer, children, initialFocus, onSubmit }: OverlayProps) {
   const ref = useRef<HTMLDivElement>(null);
   const id = useId();
   useModal(ref, onClose, initialFocus);
+  useKeepFocus(ref);
   return usePortal(
     <>
       <div className={`${styles.scrim} ${styles.thin}`} onMouseDown={onClose} aria-hidden="true" />
@@ -154,8 +189,9 @@ export function Drawer({ title, subtitle, onClose, footer, children, initialFocu
         tabIndex={-1}
       >
         <Head titleId={`${id}-t`} subtitleId={`${id}-s`} title={title} subtitle={subtitle} onClose={onClose} />
-        {children && <div className={styles.body}>{children}</div>}
-        {footer && <div className={styles.foot}>{footer}</div>}
+        <Content footer={footer} onSubmit={onSubmit}>
+          {children}
+        </Content>
       </div>
     </>,
   );

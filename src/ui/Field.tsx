@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from 'react';
+import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import styles from './Field.module.css';
 
 interface FieldProps {
@@ -92,6 +92,45 @@ export function PriceField({
         />
       </div>
       <Messages id={id} help={help} error={error} />
+    </div>
+  );
+}
+
+/** Labelled native select, styled like the text fields. */
+export function SelectField({ label, help, error, className, children, ...select }: FieldProps & SelectHTMLAttributes<HTMLSelectElement>) {
+  const { id, describedBy } = useFieldIds(error, help);
+  return (
+    <div className={[styles.f, className].filter(Boolean).join(' ')}>
+      <label className={styles.label} htmlFor={id}>
+        {label}
+      </label>
+      <div className={styles.box}>
+        <select id={id} className={`${styles.inp} ${styles.select}`} aria-invalid={error ? true : undefined} aria-describedby={describedBy} {...select}>
+          {children}
+        </select>
+        <svg className={styles.chev} viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </div>
+      <Messages id={id} help={help} error={error} />
+    </div>
+  );
+}
+
+/** Two fields side by side; stacked on phones. */
+export function FieldPair({ children }: { children: ReactNode }) {
+  return <div className={styles.pair}>{children}</div>;
+}
+
+/** A label above any control that isn't a plain input (the priority segments). */
+export function FieldGroup({ label, children }: { label: ReactNode; children: (labelId: string) => ReactNode }) {
+  const id = useId();
+  return (
+    <div className={styles.f}>
+      <span className={styles.label} id={id}>
+        {label}
+      </span>
+      {children(id)}
     </div>
   );
 }

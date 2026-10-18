@@ -102,9 +102,9 @@
   outline: none;
 }
 
-.drawer .foot {
-  margin-top: auto;
-  padding-top: 28px;
+/* In a form the footer counts as the last row of the body: its gap plus the usual 28px. */
+.form > .foot {
+  margin-top: calc(18px + 28px);
 }
 
 @keyframes fade {

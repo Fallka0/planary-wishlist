@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { Icon, type IconName } from './Icon';
 import styles from './Controls.module.css';
 
@@ -26,15 +26,17 @@ export function Segmented<T extends string | number>({
   value,
   onChange,
   label,
+  labelledBy,
 }: {
   options: SegmentOption<T>[];
   value: T;
   onChange: (value: T) => void;
-  label: string;
+  label?: string;
+  labelledBy?: string;
 }) {
   const icons = options.every((o) => o.icon);
   return (
-    <div className={icons ? styles.seg : styles.segText} role="group" aria-label={label}>
+    <div className={icons ? styles.seg : styles.segText} role="group" aria-label={label} aria-labelledby={labelledBy}>
       {options.map((o) => (
         <button
           key={String(o.value)}
@@ -56,6 +58,9 @@ export function Switch({
   checked,
   onChange,
   ...rest
-}: { checked: boolean; onChange: (checked: boolean) => void } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'>) {
+}: { checked: boolean; onChange: (checked: boolean) => void; ref?: Ref<HTMLButtonElement> } & Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  'onChange'
+>) {
   return <button type="button" role="switch" aria-checked={checked} className={styles.sw} onClick={() => onChange(!checked)} {...rest} />;
 }

@@ -16,7 +16,8 @@
   "d1_databases": [{ "binding": "DB", "database_name": "planary-wishlist", "migrations_dir": "migrations" }],
   // Checks sign-in tokens by asking planary-auth directly, worker to worker.
   "services": [{ "binding": "AUTH", "service": "planary-auth" }],
-  "routes": [{ "pattern": "wishlist.planary.ch", "custom_domain": true }],
+  // The zone is named because Cloudflare can't always infer it for a custom domain (error 10082).
+  "routes": [{ "pattern": "wishlist.planary.ch", "custom_domain": true, "zone_name": "planary.ch" }],
   "vars": {
     // Base for share links (/w/<token>) and invite links (/invite/<token>).
     "PUBLIC_APP_URL": "https://wishlist.planary.ch",

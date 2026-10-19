@@ -2,6 +2,8 @@
 
 Design handoff for rebuilding `Fallka0/planary-wishlist`. Put this folder in the repo at `docs/wishlist-v2/`, then start Claude Code with the prompt in `KICKOFF.md`.
 
+> v2 shipped as Go on Vercel with Postgres, as `BRIEF.md`, `DATA-MODEL.md` and `migrations/` describe. The backend has since moved to one Cloudflare Worker with D1 (`worker/`, see the repo README); the API contract and the rules stayed the same.
+
 Design source: the "Planary homepage" canvas, rows "Planary Wishlist · app", "Wishlist · dark mode" and "Wishlist · phone" (29 interactive screens, 16 Oct 2026).
 
 ## Contents

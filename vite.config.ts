@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
@@ -6,8 +6,10 @@ export default defineConfig({
   server: {
     port: 5376,
     proxy: {
-      // Keep the browser's Host so share and invite links point at the app, not at :8080.
-      '/api': { target: 'http://localhost:8080', changeOrigin: false },
+      // The Worker (`npm run api:dev`). Keep the browser's Host so share and invite links point at the app.
+      '/api': { target: 'http://localhost:8787', changeOrigin: false },
     },
   },
+  // The Worker has its own tests, which run inside the Workers runtime (worker/vitest.config.ts).
+  test: { include: ['src/**/*.test.{ts,tsx}'] },
 });

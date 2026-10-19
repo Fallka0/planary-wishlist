@@ -1,5 +1,5 @@
 // Planary Wishlist v2 · API types (frontend side of API.md).
-// Copy into src/lib/types.ts. Go structs in pkg/models must serialise to exactly these shapes.
+// Copy into src/lib/types.ts. The Worker's responses use these shapes (it imports src/lib/types.ts).
 // Ids are numbers (BIGSERIAL), user ids are Supabase UUID strings, money is integer cents.
 
 export type UserId = string;

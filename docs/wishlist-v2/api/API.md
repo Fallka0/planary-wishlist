@@ -1,12 +1,13 @@
 # API contract · Wishlist v2
 
-Types: `api-types.ts` (same folder). The Go handlers in `pkg/httpapi` must produce exactly those JSON shapes (camelCase).
+Types: `api-types.ts` (same folder), copied to `src/lib/types.ts`. The Worker (`worker/src`) imports those types for every response, so the JSON shapes (camelCase) can't drift.
+
+> Built first as Go functions on Vercel with Postgres; since moved to one Cloudflare Worker with D1. The contract below is unchanged.
 
 ## Conventions
 
-- Same style as today: one Vercel Go function per file under `api/`, ids in the query string (`?id=12`), JSON bodies, errors as `{"error": "...", "code": "..."}` via `pkg/httpx`.
-- Auth: `Authorization: Bearer <Supabase access token>`, checked by `pkg/auth.UserFromRequest` as now. Every authenticated request also upserts `profiles` (email + display name from Supabase `user_metadata`, see BRIEF open question 3).
-- Register every route in **both** `api/…/*.go` (Vercel) and `cmd/local-api/main.go` (local dev).
+- Ids in the query string (`?id=12`), JSON bodies, errors as `{"error": "...", "code": "..."}`. Every route is in `worker/src/index.ts`.
+- Auth: `Authorization: Bearer <planary-auth access token>`, confirmed with planary-auth's `/api/auth/me` (`worker/src/auth.ts`). Every authenticated request also upserts `profiles` (email + display name from the Planary account).
 - Money is integer cents + ISO currency. Never floats.
 - `404` for anything the caller may not see (don't reveal that a list exists).
 - Validation errors are `400` with `code: "invalid"` and a message written for the UI.
@@ -71,8 +72,8 @@ Lists sorted by `position, created_at`. `people` includes person lists the user 
 | POST | `/api/link-preview` | `{ url }` | `200 { preview: LinkPreview }` or `422 { error, code: "unreadable", store }` |
 |---|---|---|---|
 
-Wraps the existing `fetchLinkMetadata` (`pkg/app/link_preview.go`). Requirements:
-- **SSRF guard** (missing today): only `http`/`https`, ports 80/443, resolve the host and reject loopback, private, link-local, CGNAT and multicast ranges (v4 + v6), re-check on every redirect, max 3 redirects. Use a custom `net.Dialer.Control` so DNS rebinding can't slip through.
+`worker/src/linkPreview.ts`. Requirements:
+- **SSRF guard**: only `http`/`https`, ports 80/443, no credentials in the URL; refuse `localhost`, `.local`/`.internal` names, IPv6 literals and private, link-local, CGNAT and multicast IPv4 addresses; re-check on every redirect, max 3 redirects. Names that resolve to private addresses are left to Cloudflare, which doesn't route a Worker's `fetch` into private networks; the Go version checked resolved addresses itself with a dialer hook.
 - 8 s total timeout, 2 MB body cap (exists), HTML only (exists).
 - Currency: read `priceCurrency` from JSON-LD / `product:price:currency` meta; default CHF.
 - `422 unreadable` when no title could be found. The UI then shows the "We couldn't read details from <store>" state and keeps the URL.
@@ -119,7 +120,7 @@ Token: 16 random bytes, base64url (no padding). First enable creates it. Disabli
 - Guest: `email` required for reserving. Response carries `undoToken` (32 random bytes base64url); store only its sha256 in `reservations.undo_token_hash`. When email delivery is on, also mail a link `/w/<token>?undo=<undoToken>&item=<itemId>` (BRIEF open question 1; the page needs the item id for the DELETE).
 - Guests see their own reservations as `taken`; the client upgrades them to `mine` from the undo tokens in localStorage.
 - **Owner viewing their own link:** `viewer.isOwner = true` and every item has `status: "hidden"`. The page shows a banner instead of reserve buttons.
-- Simple abuse guard: max 20 reservations per IP per hour (an in-memory map is fine on Vercel; best effort).
+- Simple abuse guard: max 20 reservations per IP per hour (an in-memory map per Worker isolate is fine; best effort).
 
 ### Co-planners (person lists)
 | Method | Path | Body | Response |

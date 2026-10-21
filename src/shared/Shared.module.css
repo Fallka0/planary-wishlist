@@ -151,6 +151,12 @@
 }
 
 /* Public page footer */
+.footLegal {
+  flex-basis: 100%;
+  display: flex;
+  gap: 16px;
+}
+
 .foot {
   max-width: 1120px;
   margin: 56px auto 0;

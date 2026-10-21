@@ -219,6 +219,17 @@
   justify-self: start;
 }
 
+.foot .legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+}
+
+.foot .legal a {
+  font-weight: 500;
+  color: var(--t2);
+}
+
 @container site (max-width: 1100px) {
   .side {
     flex-basis: 232px;

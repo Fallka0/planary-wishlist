@@ -12,7 +12,7 @@ export default defineConfig(async () => {
         miniflare: {
           compatibilityDate: '2025-09-01',
           d1Databases: ['DB'],
-          bindings: { PUBLIC_APP_URL: 'https://wishlist.test', TEST_MIGRATIONS: migrations },
+          bindings: { PUBLIC_APP_URL: 'https://wishlist.test', INTERNAL_KEY: 'test-internal-key', TEST_MIGRATIONS: migrations },
           serviceBindings: {
             AUTH(req: Request) {
               const parts = (req.headers.get('authorization') ?? '').replace(/^Bearer /, '').split('|');

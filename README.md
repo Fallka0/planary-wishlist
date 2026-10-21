@@ -59,6 +59,7 @@ The code worked, but the product did not take off: we built before checking clea
 | `worker/wrangler.jsonc` | `PUBLIC_APP_URL` | Base for share and invite links. Falls back to the request's own origin. |
 | | `MAIL_FROM` | Sender for invite and undo emails. |
 | Cloudflare secret | `RESEND_API_KEY` | Optional email for invites and guests' undo links (`npx wrangler secret put RESEND_API_KEY`). Unset = no email; the app copies the links instead. |
+| Cloudflare secret | `INTERNAL_KEY` | Optional. Shared with planary-org, which reads the Console's totals from `/api/internal/totals` and switches reported share links off (`npx wrangler secret put INTERNAL_KEY`). Unset = those routes answer 404. They never return a person, a list, an item or a reservation. |
 | `worker/.dev.vars` | `AUTH_API_URL` | Local development only: confirm tokens with planary-auth over HTTPS, since there is no service binding locally. See `worker/.dev.vars.example`. |
 | `.env` | `VITE_AUTH_BASE_URL` | Where sign-in lives. Defaults to `https://auth.planary.ch`; its allowed return origins must include this app. |
 | | `VITE_API_BASE_URL` | Optional; defaults to the same origin. |

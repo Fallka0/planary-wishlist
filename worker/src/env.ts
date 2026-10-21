@@ -11,6 +11,8 @@ export interface Env {
   /** Optional email for invites and guests' undo links (Resend). Unset = no email. */
   RESEND_API_KEY?: string;
   MAIL_FROM?: string;
+  /** Shared with planary-org for the Console's totals (/api/internal/*). Unset = those routes don't exist. */
+  INTERNAL_KEY?: string;
 }
 
 /** A signed-in Planary account, as planary-auth describes it. */

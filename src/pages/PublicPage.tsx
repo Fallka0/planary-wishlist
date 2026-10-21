@@ -54,6 +54,10 @@ export function PublicPage() {
           <span>
             Make your own list on <a href="https://planary.ch/wishlist">planary.ch/wishlist</a>
           </span>
+          <span className={styles.footLegal}>
+            <a href="https://planary.ch/impressum">Impressum</a>
+            <a href="https://planary.ch/datenschutz">Datenschutz</a>
+          </span>
         </footer>
       </main>
     </>

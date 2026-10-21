@@ -175,6 +175,10 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
           Planary account
         </a>
         {name && <span>Signed in as {name}</span>}
+        <span className={styles.legal}>
+          <a className="ul" href="https://planary.ch/impressum">Impressum</a>
+          <a className="ul" href="https://planary.ch/datenschutz">Datenschutz</a>
+        </span>
       </div>
     </nav>
   );

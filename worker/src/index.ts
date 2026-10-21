@@ -5,12 +5,13 @@ import { userFromRequest } from './auth';
 import { claim, setPick, unclaim } from './claims';
 import { run } from './db';
 import type { Env, User } from './env';
-import { AppError, invalid } from './errors';
+import { AppError, invalid, notFound } from './errors';
 import { bool, int, readBody, str } from './input';
 import { createItem, deleteItem, updateItem } from './items';
 import { linkPreview } from './linkPreview';
 import { createList, deleteList, getList, updateList } from './lists';
 import { acceptInvite, invite, inviteLink, previewInvite, removeMember } from './members';
+import { disableShareLink, hasInternalKey, totals } from './internal';
 import { createOccasion, deleteOccasion, updateOccasion } from './occasions';
 import { overview, profileFor, search } from './overview';
 import { publicList, reserve, rotateShareLink, setSharing, unreserve } from './sharing';
@@ -209,6 +210,21 @@ app.post('/api/invite/accept', async (c) => {
   const user = await requireUser(c);
   const b = await readBody(c.req.raw);
   return c.json({ listId: await acceptInvite(c.env.DB, user, str(b, 'token') ?? '') });
+});
+
+// Console totals for planary-org. Without the shared key these routes answer like any unknown path.
+app.get('/api/internal/totals', async (c) => {
+  if (!(await hasInternalKey(c))) throw notFound();
+  return c.json(await totals(c.env.DB));
+});
+
+app.post('/api/internal/share-links/:listId/disable', async (c) => {
+  if (!(await hasInternalKey(c))) throw notFound();
+  const raw = c.req.param('listId');
+  const id = /^\d+$/.test(raw) ? Number(raw) : 0;
+  if (!Number.isSafeInteger(id) || id <= 0) throw notFound();
+  await disableShareLink(c.env.DB, id);
+  return c.json({ ok: true });
 });
 
 // A known path with the wrong method is a 405; an unknown /api path a 404.

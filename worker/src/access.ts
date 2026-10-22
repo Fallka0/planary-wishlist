@@ -5,34 +5,45 @@ import { initials } from './util';
 
 export type Kind = 'wish' | 'person';
 
-/** What the caller may do with one list: they own it, or they're an active co-planner. */
+/**
+ * What the caller may do with one list: they own it, or they're an active co-planner. On an
+ * organisation's wishlist the whole team is the owner (orgId is set, ownerId is who started it).
+ */
 export interface Access {
   listId: number;
   kind: Kind;
   ownerId: string;
+  orgId: string | null;
   title: string;
   role: 'owner' | 'member';
 }
 
 export const isOwner = (a: Access) => a.role === 'owner';
 
-/** The permission filter every list query uses; the user id is bound twice. */
-export const CAN_SEE_LIST = `(l.owner_id = ? OR EXISTS (
-  SELECT 1 FROM list_members m WHERE m.list_id = l.id AND m.user_id = ? AND m.status = 'active'))`;
+/**
+ * The permission filter every list query uses; the user id is bound three times. A personal list:
+ * its owner and active co-planners. An organisation's list: the organisation's team only (someone
+ * who left loses it, even if they started it).
+ */
+export const CAN_SEE_LIST = `((l.org_id IS NULL AND (l.owner_id = ? OR EXISTS (
+  SELECT 1 FROM list_members m WHERE m.list_id = l.id AND m.user_id = ? AND m.status = 'active')))
+  OR (l.org_id IS NOT NULL AND EXISTS (SELECT 1 FROM org_members om WHERE om.org_id = l.org_id AND om.user_id = ?)))`;
 
-type ListRow = { id: number; kind: Kind; owner_id: string; title: string };
+type ListRow = { id: number; kind: Kind; owner_id: string; org_id: string | null; title: string };
 
 const toAccess = (row: ListRow, userId: string): Access => ({
   listId: row.id,
   kind: row.kind,
   ownerId: row.owner_id,
+  orgId: row.org_id,
   title: row.title,
-  role: row.owner_id === userId ? 'owner' : 'member',
+  // Seeing an organisation's list means being on its team.
+  role: row.owner_id === userId || row.org_id !== null ? 'owner' : 'member',
 });
 
 /** A list the user may see. Anything else is not_found, so it can't be probed. */
 export async function listAccess(db: D1Database, listId: number, userId: string): Promise<Access> {
-  const row = await first<ListRow>(db, `SELECT l.id, l.kind, l.owner_id, l.title FROM lists l WHERE l.id = ? AND ${CAN_SEE_LIST}`, listId, userId, userId);
+  const row = await first<ListRow>(db, `SELECT l.id, l.kind, l.owner_id, l.org_id, l.title FROM lists l WHERE l.id = ? AND ${CAN_SEE_LIST}`, listId, userId, userId, userId);
   if (!row) throw notFound();
   return toAccess(row, userId);
 }
@@ -41,9 +52,10 @@ export async function listAccess(db: D1Database, listId: number, userId: string)
 export async function itemAccess(db: D1Database, itemId: number, userId: string): Promise<{ access: Access; addedBy: string | null }> {
   const row = await first<ListRow & { added_by: string | null }>(
     db,
-    `SELECT l.id, l.kind, l.owner_id, l.title, i.added_by FROM items i JOIN lists l ON l.id = i.list_id
+    `SELECT l.id, l.kind, l.owner_id, l.org_id, l.title, i.added_by FROM items i JOIN lists l ON l.id = i.list_id
      WHERE i.id = ? AND ${CAN_SEE_LIST}`,
     itemId,
+    userId,
     userId,
     userId,
   );

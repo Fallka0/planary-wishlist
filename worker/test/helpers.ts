@@ -13,6 +13,12 @@ export function newUser(name: string): TestUser {
   return { id, email: `${name.split(' ')[0].toLowerCase()}.${id.slice(0, 8)}@example.ch`, name };
 }
 
+/** A user on the teams of these organisations (see the ORG stand-in in vitest.config.ts). */
+export function newTeamUser(name: string, orgs: string[]): TestUser {
+  const u = newUser(name);
+  return { ...u, id: `team.${orgs.join('.')}.${u.id}` };
+}
+
 export interface Res {
   status: number;
   raw: string;

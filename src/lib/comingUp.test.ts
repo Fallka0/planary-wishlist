@@ -23,6 +23,7 @@ const overview: OverviewResponse = {
     { id: 1, title: 'Birthday', itemCount: 9, shared: true, occasion: occ(1, 'Birthday', 5, 24), previews: [] },
     { id: 4, title: 'Christmas', itemCount: 0, shared: false, occasion: occ(2, 'Christmas', 12, 25), previews: [] },
   ],
+  organisations: [],
   people: [
     person({ id: 5, title: 'Mom', ideaCount: 6, occasions: [occ(10, 'Birthday', 11, 2, 15000), occ(11, 'Christmas', 12, 25, 10000)], pickedCentsByOccasion: { 10: 9600 }, pickedCountByOccasion: { 10: 2 } }),
     person({ id: 6, title: 'Lea', occasions: [occ(12, 'Christmas', 12, 25, 8000)], pickedCentsByOccasion: { 12: 2990 }, pickedCountByOccasion: { 12: 1 } }),

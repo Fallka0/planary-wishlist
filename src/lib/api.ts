@@ -100,8 +100,9 @@ export const api = {
   overview: () => request<OverviewResponse>('/api/overview'),
   search: (query: string, signal?: AbortSignal) => request<SearchResponse>(`/api/search${q({ q: query })}`, { signal }),
 
-  createList: (kind: ListKind, title: string) =>
-    request<{ list: ListDetail }>('/api/lists', { method: 'POST', body: { kind, title } }).then((r) => r.list),
+  /** With orgId, a wishlist of that organisation. */
+  createList: (kind: ListKind, title: string, orgId?: string) =>
+    request<{ list: ListDetail }>('/api/lists', { method: 'POST', body: orgId ? { kind, title, orgId } : { kind, title } }).then((r) => r.list),
   list: (id: number) => request<{ list: ListDetail }>(`/api/lists${q({ id })}`).then((r) => r.list),
   updateList: (id: number, patch: { title?: string; personFullName?: string; personNotes?: string[] }) =>
     request<{ list: ListDetail }>(`/api/lists${q({ id })}`, { method: 'PATCH', body: patch }).then((r) => r.list),

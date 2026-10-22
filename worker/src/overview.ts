@@ -1,10 +1,11 @@
-import type { OverviewResponse, PersonRef, PersonSummary, Profile, SearchResponse, SharedSummary, WishListSummary } from '../../src/lib/types';
+import type { OrgSummary, OverviewResponse, PersonRef, PersonSummary, Profile, SearchResponse, SharedSummary, WishListSummary } from '../../src/lib/types';
 import { CAN_SEE_LIST, people, personRef } from './access';
 import { all, idList } from './db';
 import type { User } from './env';
 import { invalid } from './errors';
 import { ITEM_ORDER } from './items';
 import { firstOccasion, loadOccasions } from './occasions';
+import { myOrgs } from './orgs';
 import { displayName, initials, runeLength, truncateRunes } from './util';
 
 export function profileFor(user: User): Profile {
@@ -24,7 +25,21 @@ export async function overview(db: D1Database, user: User): Promise<OverviewResp
        (SELECT json_group_array(json_object('imageUrl', p.image_url, 'store', p.store))
           FROM (SELECT i.image_url, i.store FROM items i WHERE i.list_id = l.id${ITEM_ORDER} LIMIT 4) p) AS previews
      FROM lists l
-     WHERE l.owner_id = ? AND l.kind = 'wish'
+     WHERE l.owner_id = ? AND l.kind = 'wish' AND l.org_id IS NULL
+     ORDER BY l.position, l.created_at, l.id`,
+    me,
+  );
+
+  // Organisation wishlists: one group per organisation I'm on the team of, even when it has none yet.
+  const orgs = await myOrgs(db, me);
+  const orgRows = await all<{ id: number; org_id: string; title: string; share_enabled: number; item_count: number; previews: string }>(
+    db,
+    `SELECT l.id, l.org_id, l.title, l.share_enabled,
+       (SELECT COUNT(*) FROM items i WHERE i.list_id = l.id) AS item_count,
+       (SELECT json_group_array(json_object('imageUrl', p.image_url, 'store', p.store))
+          FROM (SELECT i.image_url, i.store FROM items i WHERE i.list_id = l.id${ITEM_ORDER} LIMIT 4) p) AS previews
+     FROM lists l JOIN org_members om ON om.org_id = l.org_id AND om.user_id = ?
+     WHERE l.kind = 'wish'
      ORDER BY l.position, l.created_at, l.id`,
     me,
   );
@@ -36,27 +51,28 @@ export async function overview(db: D1Database, user: User): Promise<OverviewResp
      FROM lists l
      WHERE l.kind = 'person' AND ${CAN_SEE_LIST}
      ORDER BY (l.owner_id = ?) DESC, l.position, l.created_at, l.id`,
-    me, me, me,
+    me, me, me, me,
   );
 
   // Shared with me: links I opened while signed in, still switched on, not my own.
-  const sharedRows = await all<{ id: number; share_token: string; title: string; owner_id: string; item_count: number; taken_count: number; mine_count: number }>(
+  const sharedRows = await all<{ id: number; share_token: string; title: string; owner_id: string; org_name: string | null; item_count: number; taken_count: number; mine_count: number }>(
     db,
-    `SELECT l.id, l.share_token, l.title, l.owner_id,
+    `SELECT l.id, l.share_token, l.title, l.owner_id, (SELECT o.name FROM orgs o WHERE o.id = l.org_id) AS org_name,
        COUNT(i.id) AS item_count, COUNT(r.item_id) AS taken_count,
        SUM(CASE WHEN r.user_id = ? THEN 1 ELSE 0 END) AS mine_count
      FROM list_followers f
      JOIN lists l ON l.id = f.list_id AND l.kind = 'wish' AND l.share_enabled = 1 AND l.owner_id <> ?
+       AND NOT EXISTS (SELECT 1 FROM org_members om WHERE om.org_id = l.org_id AND om.user_id = ?)
      LEFT JOIN items i ON i.list_id = l.id
      LEFT JOIN reservations r ON r.item_id = i.id
      WHERE f.user_id = ?
      GROUP BY l.id
      ORDER BY MAX(f.created_at) DESC, l.id`,
-    me, me, me,
+    me, me, me, me,
   );
 
   const personIds = personRows.map((r) => r.id);
-  const occasions = await loadOccasions(db, [...wishRows.map((r) => r.id), ...personIds, ...sharedRows.map((r) => r.id)]);
+  const occasions = await loadOccasions(db, [...wishRows.map((r) => r.id), ...orgRows.map((r) => r.id), ...personIds, ...sharedRows.map((r) => r.id)]);
 
   // Budget ticks per occasion. Mixed currencies are rare: the sum is CHF only.
   const cents = new Map<number, Record<number, number>>();
@@ -97,13 +113,20 @@ export async function overview(db: D1Database, user: User): Promise<OverviewResp
   }
   const refs = await people(db, [...[...planners.values()].flat(), ...sharedRows.map((r) => r.owner_id)], me);
 
-  const lists: WishListSummary[] = wishRows.map((r) => ({
+  const summary = (r: { id: number; title: string; share_enabled: number; item_count: number; previews: string }): WishListSummary => ({
     id: r.id,
     title: r.title,
     itemCount: r.item_count,
     shared: Boolean(r.share_enabled),
     occasion: firstOccasion(occasions.get(r.id)),
     previews: JSON.parse(r.previews) as WishListSummary['previews'],
+  });
+  const lists = wishRows.map(summary);
+  const organisations: OrgSummary[] = orgs.map((o) => ({
+    id: o.id,
+    name: o.name,
+    maxLists: o.maxLists,
+    lists: orgRows.filter((r) => r.org_id === o.id).map(summary),
   }));
   const peopleOut: PersonSummary[] = personRows.map((r) => ({
     id: r.id,
@@ -120,18 +143,19 @@ export async function overview(db: D1Database, user: User): Promise<OverviewResp
     listId: r.id,
     token: r.share_token,
     title: r.title,
-    owner: refs.get(r.owner_id)!,
+    // An organisation's list is shown as the organisation's, not the person who started it.
+    owner: r.org_name ? personRef(`org-${r.id}`, r.org_name, me) : refs.get(r.owner_id)!,
     itemCount: r.item_count,
     takenCount: r.taken_count,
     mineCount: r.mine_count ?? 0,
     occasion: firstOccasion(occasions.get(r.id)),
   }));
-  return { me: profileFor(user), lists, people: peopleOut, shared };
+  return { me: profileFor(user), lists, organisations, people: peopleOut, shared };
 }
 
 /**
- * Lists (by title or the person's full name) and items (by name) the user owns or plans. Lists
- * shared with the user aren't searched.
+ * Lists (by title or the person's full name) and items (by name) the user owns or plans, with
+ * their organisations' wishlists. Lists shared with the user aren't searched.
  */
 export async function search(db: D1Database, userId: string, raw: string): Promise<SearchResponse> {
   let q = raw.trim();
@@ -143,14 +167,14 @@ export async function search(db: D1Database, userId: string, raw: string): Promi
     `SELECT l.id, l.kind, l.title FROM lists l
      WHERE ${CAN_SEE_LIST} AND (l.title LIKE ? ESCAPE '\\' OR l.person_full_name LIKE ? ESCAPE '\\')
      ORDER BY l.title, l.id LIMIT 5`,
-    userId, userId, pattern, pattern,
+    userId, userId, userId, pattern, pattern,
   );
   const items = await all<{ id: number; list_id: number; kind: 'wish' | 'person'; title: string; name: string }>(
     db,
     `SELECT i.id, l.id AS list_id, l.kind, l.title, i.name FROM items i JOIN lists l ON l.id = i.list_id
      WHERE ${CAN_SEE_LIST} AND i.name LIKE ? ESCAPE '\\'
      ORDER BY i.created_at DESC, i.id DESC LIMIT 10`,
-    userId, userId, pattern,
+    userId, userId, userId, pattern,
   );
   return {
     lists: lists.map((l) => ({ id: l.id, kind: l.kind, title: l.title })),

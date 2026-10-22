@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ChoiceGrid, KindChoice, useNewList } from '../app/NewList';
 import { useOverview } from '../app/Shell';
 import { comingUp } from '../lib/comingUp';
 import { formatDate, formatDayMonth, nextOccurrence, pluralise, todayInZurich } from '../lib/format';
 import { nextOf } from '../lib/occasions';
-import type { OverviewResponse } from '../lib/types';
+import type { OrgSummary, OverviewResponse, WishListSummary } from '../lib/types';
 import { Avatar, AvatarStack, Button, Icon, ProgressBar, Skeleton, Tag, Tile } from '../ui';
 import page from './Page.module.css';
 import styles from './OverviewPage.module.css';
@@ -51,6 +52,32 @@ function ComingUp({ data, today }: { data: OverviewResponse; today: Date }) {
   );
 }
 
+function WishGrid({ lists }: { lists: WishListSummary[] }) {
+  return (
+    <ul className={styles.lgrid}>
+      {lists.map((l) => (
+        <li key={l.id}>
+          <Link className={styles.lc} to={`/app/lists/${l.id}`}>
+            <span className={styles.mos} aria-hidden="true">
+              {[0, 1, 2, 3].map((i) =>
+                l.previews[i] ? <Tile key={i} imageUrl={l.previews[i].imageUrl} /> : <span key={i} className={styles.blank} />,
+              )}
+            </span>
+            <span className={styles.lcTitle}>
+              {l.title}
+              {l.shared ? <Tag icon="globe">Shared</Tag> : <Tag icon="lock">Private</Tag>}
+            </span>
+            <span className={styles.lcSub}>
+              {pluralise(l.itemCount, 'item')}
+              {l.occasion && ` · ${formatDayMonth(l.occasion)}`}
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function MyWishlists({ data }: { data: OverviewResponse }) {
   if (data.lists.length === 0) return null;
   return (
@@ -61,27 +88,34 @@ function MyWishlists({ data }: { data: OverviewResponse }) {
         </h2>
         <span className={page.secSub}>Things you’d like yourself</span>
       </div>
-      <ul className={styles.lgrid}>
-        {data.lists.map((l) => (
-          <li key={l.id}>
-            <Link className={styles.lc} to={`/app/lists/${l.id}`}>
-              <span className={styles.mos} aria-hidden="true">
-                {[0, 1, 2, 3].map((i) =>
-                  l.previews[i] ? <Tile key={i} imageUrl={l.previews[i].imageUrl} /> : <span key={i} className={styles.blank} />,
-                )}
-              </span>
-              <span className={styles.lcTitle}>
-                {l.title}
-                {l.shared ? <Tag icon="globe">Shared</Tag> : <Tag icon="lock">Private</Tag>}
-              </span>
-              <span className={styles.lcSub}>
-                {pluralise(l.itemCount, 'item')}
-                {l.occasion && ` · ${formatDayMonth(l.occasion)}`}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <WishGrid lists={data.lists} />
+    </section>
+  );
+}
+
+/** One section per organisation I'm on the team of, with room left on its plan. */
+function OrgWishlists({ org }: { org: OrgSummary }) {
+  const openNew = useNewList();
+  const full = org.maxLists !== null && org.lists.length >= org.maxLists;
+  const id = `h-org-${org.id}`;
+  return (
+    <section className={page.sec} aria-labelledby={id}>
+      <div className={page.secHead}>
+        <h2 id={id} className={page.h2}>
+          {org.name}
+        </h2>
+        <span className={page.secSub}>
+          {full ? `Your plan has room for ${pluralise(org.maxLists ?? 0, 'wishlist')}` : 'Wishlists your team edits together'}
+        </span>
+      </div>
+      {org.lists.length > 0 ? <WishGrid lists={org.lists} /> : <p className={page.secSub}>No wishlists yet.</p>}
+      {!full && (
+        <div className={styles.orgNew}>
+          <Button variant="ghost" icon="plus" onClick={() => openNew('wish', org.id)}>
+            New wishlist for {org.name}
+          </Button>
+        </div>
+      )}
     </section>
   );
 }
@@ -177,7 +211,16 @@ export function OverviewPage() {
   const openNew = useNewList();
   const today = todayInZurich();
 
-  if (data && data.lists.length === 0 && data.people.length === 0 && data.shared.length === 0) return <FirstRun />;
+  // The portal's "Neue Wunschliste" link: /app?org=<id> opens the dialog for that organisation.
+  const [params, setParams] = useSearchParams();
+  const orgParam = params.get('org');
+  useEffect(() => {
+    if (!orgParam || !data) return;
+    if (data.organisations.some((o) => o.id === orgParam)) openNew('wish', orgParam);
+    setParams({}, { replace: true });
+  }, [orgParam, data, openNew, setParams]);
+
+  if (data && data.lists.length === 0 && data.organisations.length === 0 && data.people.length === 0 && data.shared.length === 0) return <FirstRun />;
 
   return (
     <>
@@ -197,6 +240,9 @@ export function OverviewPage() {
         <>
           <ComingUp data={data} today={today} />
           <MyWishlists data={data} />
+          {data.organisations.map((o) => (
+            <OrgWishlists key={o.id} org={o} />
+          ))}
           <GiftIdeas data={data} today={today} />
           <SharedWithMe data={data} today={today} />
         </>

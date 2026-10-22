@@ -12,7 +12,8 @@ Team project under the Planary brand, where I was the lead developer.
 
 - **Wishlists**: as many as you like. Add by link (the API reads Open Graph tags, JSON-LD and price hints, behind an SSRF guard) or by hand; priority, note, filters, sort, rows or grid, totals in CHF. Remove has a 5-second Undo.
 - **Sharing**: one link per wishlist, which can be switched off or replaced. Friends reserve without an account (email, with an undo link) or with their Planary account, and the list then shows under "Shared with me".
-- **Privacy rule**: a wishlist's owner never sees reservations, not even indirectly. The server enforces it and an integration test ("never shows a wishlist owner its reservations" in `worker/test/api.test.ts`) checks every response the owner can get.
+- **Privacy rule**: a wishlist's owner never sees reservations, not even indirectly. The server enforces it and an integration test ("never shows a wishlist owner its reservations" in `worker/test/api.test.ts`) checks every response the owner can get; `worker/test/orgs.test.ts` does the same for everyone on an organisation's team.
+- **Organisation wishlists**: a Planary organisation that uses Wishlist (chosen in the portal, portal.planary.ch) has its own wishlists, which everyone on its team edits. The team counts as the owner, so nobody on it sees reservations either; a shared organisation list shows the organisation as its owner. The plan sets how many lists it may have.
 - **Gift ideas**: a private list per person with ideas, dates with countdowns, a budget per date filled by ticking ideas, and notes like sizes. Invite co-planners by email or link; they add ideas and say "I'll get this", and everyone sees who's getting what.
 - **Overview**: what's coming up in the next ten weeks, your wishlists, gift ideas and lists shared with you, plus search across all of them.
 - Sign-in with the shared Planary account (auth.planary.ch). Light and dark themes, phone layouts, keyboard and screen-reader support.
@@ -44,7 +45,7 @@ docs/wishlist-v2/ design and implementation handoff for v2
 
 **API**: specified in [`docs/wishlist-v2/api/API.md`](docs/wishlist-v2/api/API.md); the response types are shared with the frontend (`src/lib/types.ts`). Every route is in `worker/src/index.ts`. Permissions are checked in SQL (owner, or an active co-planner), and anything you may not see is a 404. Writes that must not race (one date per wishlist, one claim per idea, invites) are single conditional statements, since D1 has no interactive transactions.
 
-**Migrations**: `worker/migrations`, applied with `wrangler d1 migrations apply` before each deploy. Add a new numbered file for any schema change; never edit one that has shipped.
+**Migrations**: `worker/migrations` (0002 adds organisation lists), applied with `wrangler d1 migrations apply` before each deploy. Add a new numbered file for any schema change; never edit one that has shipped.
 
 **Frontend**: Vite, React 19, react-router 7 and TanStack Query; styling is design tokens plus CSS Modules, no component library. Pages use container queries (1100 px and 760 px) so dialogs and the shell share one set of breakpoints.
 
@@ -59,7 +60,8 @@ The code worked, but the product did not take off: we built before checking clea
 | `worker/wrangler.jsonc` | `PUBLIC_APP_URL` | Base for share and invite links. Falls back to the request's own origin. |
 | | `MAIL_FROM` | Sender for invite and undo emails. |
 | Cloudflare secret | `RESEND_API_KEY` | Optional email for invites and guests' undo links (`npx wrangler secret put RESEND_API_KEY`). Unset = no email; the app copies the links instead. |
-| Cloudflare secret | `INTERNAL_KEY` | Optional. Shared with planary-org, which reads the Console's totals from `/api/internal/totals` and switches reported share links off (`npx wrangler secret put INTERNAL_KEY`). Unset = those routes answer 404. They never return a person, a list, an item or a reservation. |
+| Cloudflare secret | `INTERNAL_KEY` | Optional. Shared with planary-org (`npx wrangler secret put INTERNAL_KEY`), which reads the Console's totals from `/api/internal/totals`, switches reported share links off, and reads an organisation's wishlists for the portal from `/api/internal/orgs/:id/lists` (title, item count, value, shared or not, who started it). Wishlist uses it to ask planary-org which organisations someone is on. Unset = those routes answer 404 and there are no organisation lists. No internal route returns an item or a reservation. |
+| `worker/wrangler.jsonc` | `ORG` | Service binding to planary-org. Team memberships are copied from it on sign-in, at most every two minutes per person; only organisations that use Wishlist count. |
 | `worker/.dev.vars` | `AUTH_API_URL` | Local development only: confirm tokens with planary-auth over HTTPS, since there is no service binding locally. See `worker/.dev.vars.example`. |
 | `.env` | `VITE_AUTH_BASE_URL` | Where sign-in lives. Defaults to `https://auth.planary.ch`; its allowed return origins must include this app. |
 | | `VITE_API_BASE_URL` | Optional; defaults to the same origin. |

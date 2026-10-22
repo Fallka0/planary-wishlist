@@ -201,7 +201,7 @@ function Wishlist({ list }: { list: WishListDetail }) {
       <div className={page.ph}>
         <div>
           <p className={page.crumb}>
-            <Link to="/app">My wishlists</Link>
+            <Link to="/app">{list.org ? list.org.name : 'My wishlists'}</Link>
           </p>
           <h1 className={page.h1}>{list.title}</h1>
           <p className={page.meta}>
@@ -209,7 +209,7 @@ function Wishlist({ list }: { list: WishListDetail }) {
             {total && <span>{total}</span>}
             <span>
               <Icon name={list.share.enabled ? 'globe' : 'lock'} small />
-              {list.share.enabled ? 'Shared by link' : 'Only you'}
+              {list.share.enabled ? 'Shared by link' : list.org ? 'Only your team' : 'Only you'}
             </span>
           </p>
         </div>

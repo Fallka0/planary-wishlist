@@ -138,6 +138,21 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
               </NavLink>
             ))}
           </div>
+          {data.organisations.map((o) => (
+            <div key={o.id} className={styles.group}>
+              <p className={styles.groupHead}>{o.name}</p>
+              {o.lists.length === 0 && <p className={styles.none}>No wishlists yet</p>}
+              {o.lists.map((l) => (
+                <NavLink key={l.id} to={`/app/lists/${l.id}`} className={styles.item}>
+                  <span className={styles.itemIcon}>
+                    <Icon name="gift" />
+                  </span>
+                  <span className={styles.itemText}>{l.title}</span>
+                  <span className={styles.itemCount}>{l.itemCount}</span>
+                </NavLink>
+              ))}
+            </div>
+          ))}
           <div className={styles.group}>
             <p className={styles.groupHead}>Gift ideas</p>
             {data.people.length === 0 && <p className={styles.none}>Nobody yet</p>}

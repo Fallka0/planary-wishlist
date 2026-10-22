@@ -15,7 +15,11 @@
   // No database_id: the first deploy creates the database, later commands find it by name.
   "d1_databases": [{ "binding": "DB", "database_name": "planary-wishlist", "migrations_dir": "migrations" }],
   // Checks sign-in tokens by asking planary-auth directly, worker to worker.
-  "services": [{ "binding": "AUTH", "service": "planary-auth" }],
+  "services": [
+    { "binding": "AUTH", "service": "planary-auth" },
+    // Which Planary organisations (that use Wishlist) a person is on, for organisation wishlists.
+    { "binding": "ORG", "service": "planary-org" }
+  ],
   // The zone is named because Cloudflare can't always infer it for a custom domain (error 10082).
   "routes": [{ "pattern": "wishlist.planary.ch", "custom_domain": true, "zone_name": "planary.ch" }],
   "vars": {

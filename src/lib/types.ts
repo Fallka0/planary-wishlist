@@ -95,7 +95,14 @@ export interface WishListDetail {
   title: string;
   occasion: Occasion | null;   // at most one on a wishlist
   share: ShareState;
+  org: OrgRef | null;          // set on an organisation's wishlist, which its whole team edits
   items: WishItem[];
+}
+
+/** A Planary organisation (planary-org) the user is on the team of. */
+export interface OrgRef {
+  id: string;
+  name: string;
 }
 
 export interface Member {
@@ -155,9 +162,16 @@ export interface SharedSummary {
   occasion: Occasion | null;
 }
 
+/** An organisation's wishlists. maxLists comes from its plan; null = unlimited. */
+export interface OrgSummary extends OrgRef {
+  maxLists: number | null;
+  lists: WishListSummary[];
+}
+
 export interface OverviewResponse {
   me: Profile;
   lists: WishListSummary[];
+  organisations: OrgSummary[];
   people: PersonSummary[];
   shared: SharedSummary[];
 }

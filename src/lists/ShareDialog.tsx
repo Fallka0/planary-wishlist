@@ -50,7 +50,7 @@ export function ShareDialog({ list, onClose }: { list: WishListDetail; onClose: 
           <p className={styles.swTitle} id={labelId}>
             Share by link
           </p>
-          <p className={styles.swSub}>{on ? 'On. Anyone with the link can open it.' : 'Off. Only you can see this list.'}</p>
+          <p className={styles.swSub}>{on ? 'On. Anyone with the link can open it.' : list.org ? 'Off. Only your team can see this list.' : 'Off. Only you can see this list.'}</p>
         </div>
         <Switch ref={switchRef} checked={on} aria-labelledby={labelId} disabled={toggle.isPending} onChange={(v) => toggle.mutate(v)} />
       </div>

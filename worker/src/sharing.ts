@@ -1,5 +1,5 @@
 import type { PublicItem, PublicListResponse, ReserveResponse, ShareState } from '../../src/lib/types';
-import { isOwner, listAccess, people } from './access';
+import { isOwner, listAccess, people, personRef } from './access';
 import { all, first, NOW, run } from './db';
 import type { Env } from './env';
 import { forbidden, invalid, linkOff, notFound, rateLimited, taken } from './errors';
@@ -8,6 +8,7 @@ import { ITEM_ORDER, wishItems } from './items';
 import { shareState } from './lists';
 import { sendMail } from './mail';
 import { firstOccasion, loadOccasions } from './occasions';
+import { inOrg, orgRef } from './orgs';
 import { cleanEmail, hashToken, newSecretToken, newShareToken } from './util';
 
 // ── Sharing (wishlist owners) ──
@@ -49,19 +50,30 @@ interface SharedList {
   id: number;
   title: string;
   ownerId: string;
+  orgId: string | null;
 }
 
 /** Resolves a share token. Unknown tokens and lists with sharing off are link_off. */
 async function openSharedList(db: D1Database, token: string): Promise<SharedList> {
   token = token.trim();
   if (!token) throw linkOff();
-  const row = await first<{ id: number; title: string; owner_id: string }>(
+  const row = await first<{ id: number; title: string; owner_id: string; org_id: string | null }>(
     db,
-    `SELECT id, title, owner_id FROM lists WHERE share_token = ? AND share_enabled = 1 AND kind = 'wish'`,
+    `SELECT id, title, owner_id, org_id FROM lists WHERE share_token = ? AND share_enabled = 1 AND kind = 'wish'`,
     token,
   );
   if (!row) throw linkOff();
-  return { id: row.id, title: row.title, ownerId: row.owner_id };
+  return { id: row.id, title: row.title, ownerId: row.owner_id, orgId: row.org_id };
+}
+
+/**
+ * True for whoever owns the list: its owner, and on an organisation's list everyone on the team
+ * (and who started it). They get the owner's view, never reservations, and can't reserve.
+ */
+async function ownsShared(db: D1Database, l: SharedList, viewerId: string): Promise<boolean> {
+  if (!viewerId) return false;
+  if (viewerId === l.ownerId) return true;
+  return l.orgId !== null && (await inOrg(db, l.orgId, viewerId));
 }
 
 type PublicRow = {
@@ -104,7 +116,7 @@ async function ownerItems(db: D1Database, listId: number): Promise<PublicItem[]>
  */
 export async function publicList(db: D1Database, viewerId: string, token: string): Promise<PublicListResponse> {
   const l = await openSharedList(db, token);
-  const owner = viewerId !== '' && viewerId === l.ownerId;
+  const owner = await ownsShared(db, l, viewerId);
   let items: PublicItem[];
   if (owner) {
     items = await ownerItems(db, l.id);
@@ -114,8 +126,10 @@ export async function publicList(db: D1Database, viewerId: string, token: string
   }
   const occasions = await loadOccasions(db, [l.id]);
   const refs = await people(db, [l.ownerId], viewerId);
+  const org = await orgRef(db, l.orgId);
   return {
-    list: { title: l.title, owner: refs.get(l.ownerId)!, occasion: firstOccasion(occasions.get(l.id)), items },
+    // An organisation's list is shown as the organisation's.
+    list: { title: l.title, owner: org ? personRef(`org-${l.id}`, org.name, viewerId) : refs.get(l.ownerId)!, occasion: firstOccasion(occasions.get(l.id)), items },
     viewer: { signedIn: viewerId !== '', isOwner: owner },
   };
 }
@@ -152,7 +166,7 @@ export async function reserve(env: Env, viewerId: string, b: Body, ip: string, b
   const itemId = int(b, 'itemId') ?? 0;
   const l = await openSharedList(db, token);
   // Checked before anything else, so the owner's request can't tell whether the item is taken.
-  if (viewerId && viewerId === l.ownerId) throw forbidden('This is your own list. Friends reserve here, you don’t.');
+  if (await ownsShared(db, l, viewerId)) throw forbidden('This is your own list. Friends reserve here, you don’t.');
   let email = '';
   let undo = '';
   if (!viewerId) {
@@ -195,7 +209,7 @@ export async function reserve(env: Env, viewerId: string, b: Body, ip: string, b
 export async function unreserve(db: D1Database, viewerId: string, b: Body): Promise<PublicItem> {
   const l = await openSharedList(db, str(b, 'token') ?? '');
   const itemId = int(b, 'itemId') ?? 0;
-  if (viewerId && viewerId === l.ownerId) throw forbidden('This is your own list. Friends reserve here, you don’t.');
+  if (await ownsShared(db, l, viewerId)) throw forbidden('This is your own list. Friends reserve here, you don’t.');
   const undo = (str(b, 'undoToken') ?? '').trim();
   let changed: number;
   if (undo) {

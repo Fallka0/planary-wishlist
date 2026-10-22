@@ -12,6 +12,7 @@ import { linkPreview } from './linkPreview';
 import { createList, deleteList, getList, updateList } from './lists';
 import { acceptInvite, invite, inviteLink, previewInvite, removeMember } from './members';
 import { disableShareLink, hasInternalKey, totals } from './internal';
+import { orgLists, syncOrgs } from './orgs';
 import { createOccasion, deleteOccasion, updateOccasion } from './occasions';
 import { overview, profileFor, search } from './overview';
 import { publicList, reserve, rotateShareLink, setSharing, unreserve } from './sharing';
@@ -45,6 +46,7 @@ async function requireUser(c: C): Promise<User> {
   const user = await userFromRequest(c.env, c.req.raw);
   if (!user) throw unauthorized();
   await upsertProfile(c.env, user);
+  await syncOrgs(c.env, user).catch((e) => console.log(`org sync ${user.id}: ${e}`));
   return user;
 }
 
@@ -52,7 +54,10 @@ async function requireUser(c: C): Promise<User> {
 async function optionalUser(c: C): Promise<User | null> {
   if (!c.req.header('authorization')?.trim()) return null;
   const user = await userFromRequest(c.env, c.req.raw);
-  if (user) await upsertProfile(c.env, user);
+  if (user) {
+    await upsertProfile(c.env, user);
+    await syncOrgs(c.env, user).catch((e) => console.log(`org sync ${user.id}: ${e}`));
+  }
   return user;
 }
 
@@ -93,7 +98,7 @@ app.get('/api/overview', async (c) => c.json(await overview(c.env.DB, await requ
 
 app.post('/api/lists', async (c) => {
   const user = await requireUser(c);
-  return c.json({ list: await createList(c.env.DB, user.id, await readBody(c.req.raw), baseURL(c)) }, 201);
+  return c.json({ list: await createList(c.env, user, await readBody(c.req.raw), baseURL(c)) }, 201);
 });
 app.get('/api/lists', async (c) => {
   const user = await requireUser(c);
@@ -216,6 +221,14 @@ app.post('/api/invite/accept', async (c) => {
 app.get('/api/internal/totals', async (c) => {
   if (!(await hasInternalKey(c))) throw notFound();
   return c.json(await totals(c.env.DB));
+});
+
+// An organisation's wishlists for the Planary portal, totals per list only.
+app.get('/api/internal/orgs/:orgId/lists', async (c) => {
+  if (!(await hasInternalKey(c))) throw notFound();
+  const orgId = c.req.param('orgId');
+  if (!/^[\w-]{1,64}$/.test(orgId)) throw notFound();
+  return c.json({ lists: await orgLists(c.env.DB, orgId) });
 });
 
 app.post('/api/internal/share-links/:listId/disable', async (c) => {

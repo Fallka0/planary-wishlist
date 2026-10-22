@@ -26,6 +26,8 @@ Types: `api-types.ts` (same folder), copied to `src/lib/types.ts`. The Worker (`
 | Share link on/off/rotate | ✓ | – | – | – | – |
 | Invite / remove co-planners | – | ✓ | – | – | – |
 
+**Organisation wishlists:** a wishlist with `org_id` belongs to a Planary organisation. Everyone on its team (copied from planary-org, only for organisations that use Wishlist) has the wishlist owner's column above; nobody else sees it, not even who started it once they've left the team. The privacy rule applies to every one of them.
+
 **Privacy rule (hard):** no response to a wishlist's owner may contain anything derived from `reservations` for that list. That includes counts, `status` other than `hidden`, timestamps, and side effects like ordering. There's a test for this (BRIEF, phase 5).
 
 ## Endpoints
@@ -45,17 +47,17 @@ Case-insensitive substring match (`ILIKE`) on list titles, person full names and
 | GET | `/api/overview` | – | `OverviewResponse` |
 |---|---|---|---|
 
-Lists sorted by `position, created_at`. `people` includes person lists the user owns **and** ones they're an active member of (`role` tells which). `shared` = `list_followers` rows for lists whose share link is still enabled.
+Lists sorted by `position, created_at`. `people` includes person lists the user owns **and** ones they're an active member of (`role` tells which). `shared` = `list_followers` rows for lists whose share link is still enabled. `organisations` = one entry per organisation the user is on the team of, with its wishlists and `maxLists`.
 
 ### Lists
 | Method | Path | Body | Response |
 |---|---|---|---|
-| POST | `/api/lists` | `{ kind, title }` | `201 { list: ListDetail }` |
+| POST | `/api/lists` | `{ kind, title, orgId? }` | `201 { list: ListDetail }` |
 | GET | `/api/lists?id=` | – | `{ list: ListDetail }` |
 | PATCH | `/api/lists?id=` | `{ title?, personFullName?, personNotes?: string[] }` | `{ list: ListDetail }` |
 | DELETE | `/api/lists?id=` | – | `204` |
 
-`title` 1–60 chars. `personNotes` max 20 lines × 200 chars, stored joined with `\n`.
+`title` 1–60 chars. `personNotes` max 20 lines × 200 chars, stored joined with `\n`. With `orgId` the list is a wishlist of that organisation (`kind` must be `wish`): 404 when the user isn't on its team, 409 `limit` when the plan's number of lists is reached. `WishListDetail.org` is then set.
 
 ### Items (wishlist items and person-list ideas)
 | Method | Path | Body | Response |

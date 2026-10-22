@@ -21,6 +21,24 @@ export default defineConfig(async () => {
               }
               return Response.json({ user: { id: parts[1], email: parts[2], name: parts[3] } });
             },
+            // Stands in for planary-org: a user id "team.<org>.<org>.<uuid>" is on those teams.
+            // org_tournament doesn't use Wishlist; org_small has room for one wishlist.
+            ORG(req: Request) {
+              const m = /^\/internal\/people\/([^/]+)\/orgs$/.exec(new URL(req.url).pathname);
+              if (!m || req.headers.get('x-internal-key') !== 'test-internal-key') return new Response('{}', { status: 404 });
+              const id = decodeURIComponent(m[1]);
+              const ids = id.startsWith('team.') ? id.split('.').slice(1, -1) : [];
+              return Response.json({
+                orgs: ids.map((o) => ({
+                  id: o,
+                  name: `Club ${o}`,
+                  role: 'member',
+                  plan: 'gratis',
+                  services: o === 'org_tournament' ? ['tournament'] : ['tournament', 'wishlist'],
+                  wishlist: { maxLists: o === 'org_small' ? 1 : null },
+                })),
+              });
+            },
           },
         },
       }),

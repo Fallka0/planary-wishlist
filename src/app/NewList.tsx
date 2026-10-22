@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, ApiError } from '../lib/api';
 import { keys } from '../lib/queryClient';
-import type { ListKind } from '../lib/types';
+import type { ListKind, OrgSummary } from '../lib/types';
 import { Button, Dialog, TextField, useToast } from '../ui';
 import { UI_ICONS } from '../ui/icons';
 import styles from './NewList.module.css';
@@ -55,8 +55,33 @@ export function ChoiceGrid({ children, label }: { children: ReactNode; label?: s
   );
 }
 
-function NewListDialog({ initialKind, onClose }: { initialKind: ListKind; onClose: () => void }) {
-  const [kind, setKind] = useState<ListKind>(initialKind);
+/** Who a new wishlist is for: me, or one of my organisations (its whole team edits it). */
+function OwnerChoice({ orgs, value, onChange }: { orgs: OrgSummary[]; value: string; onChange: (orgId: string) => void }) {
+  return (
+    <fieldset className={styles.owner}>
+      <legend className={styles.ownerLegend}>Whose list is it?</legend>
+      <label className={styles.ownerOption}>
+        <input type="radio" name="owner" value="" checked={value === ''} onChange={() => onChange('')} />
+        <span>Mine</span>
+      </label>
+      {orgs.map((o) => (
+        <label key={o.id} className={styles.ownerOption}>
+          <input type="radio" name="owner" value={o.id} checked={value === o.id} onChange={() => onChange(o.id)} />
+          <span>
+            {o.name}
+            <span className={styles.ownerSub}>Your team edits it together</span>
+          </span>
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+function NewListDialog({ initialKind, initialOrg, onClose }: { initialKind: ListKind; initialOrg: string; onClose: () => void }) {
+  const { data: overview } = useQuery({ queryKey: keys.overview, queryFn: api.overview });
+  const orgs = overview?.organisations ?? [];
+  const [orgId, setOrgId] = useState(initialOrg);
+  const [kind, setKind] = useState<ListKind>(initialOrg ? 'wish' : initialKind);
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -64,7 +89,7 @@ function NewListDialog({ initialKind, onClose }: { initialKind: ListKind; onClos
   const qc = useQueryClient();
 
   const create = useMutation({
-    mutationFn: () => api.createList(kind, name),
+    mutationFn: () => (orgId ? api.createList('wish', name, orgId) : api.createList(kind, name)),
     onSuccess: (list) => {
       qc.setQueryData(keys.list(list.id), list);
       qc.invalidateQueries({ queryKey: keys.overview });
@@ -98,13 +123,25 @@ function NewListDialog({ initialKind, onClose }: { initialKind: ListKind; onClos
         </>
       }
     >
-      <ChoiceGrid label="Kind of list">
-        <KindChoice kind="wish" small pressed={kind === 'wish'} onClick={() => setKind('wish')} />
-        <KindChoice kind="person" small pressed={kind === 'person'} onClick={() => setKind('person')} />
-      </ChoiceGrid>
+      {orgs.length > 0 && (
+        <OwnerChoice
+          orgs={orgs}
+          value={orgs.some((o) => o.id === orgId) ? orgId : ''}
+          onChange={(id) => {
+            setOrgId(id);
+            if (id) setKind('wish');
+          }}
+        />
+      )}
+      {!orgId && (
+        <ChoiceGrid label="Kind of list">
+          <KindChoice kind="wish" small pressed={kind === 'wish'} onClick={() => setKind('wish')} />
+          <KindChoice kind="person" small pressed={kind === 'person'} onClick={() => setKind('person')} />
+        </ChoiceGrid>
+      )}
       <TextField
         label={kind === 'wish' ? 'List name' : 'Who is it for?'}
-        placeholder={kind === 'wish' ? 'e.g. Ski season' : 'e.g. Dad, or Sara from work'}
+        placeholder={orgId ? 'e.g. Club party' : kind === 'wish' ? 'e.g. Ski season' : 'e.g. Dad, or Sara from work'}
         value={name}
         maxLength={60}
         error={error}
@@ -117,17 +154,18 @@ function NewListDialog({ initialKind, onClose }: { initialKind: ListKind; onClos
   );
 }
 
-type OpenNewList = (kind?: ListKind) => void;
+/** Opens the dialog; with orgId, preset to a wishlist of that organisation. */
+type OpenNewList = (kind?: ListKind, orgId?: string) => void;
 const NewListContext = createContext<OpenNewList>(() => {});
 
 /** Lets the sidebar, the overview and the first-run screen open the New list dialog. */
 export function NewListProvider({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState<ListKind | null>(null);
-  const openNew = useCallback<OpenNewList>((kind = 'wish') => setOpen(kind), []);
+  const [open, setOpen] = useState<{ kind: ListKind; orgId: string } | null>(null);
+  const openNew = useCallback<OpenNewList>((kind = 'wish', orgId = '') => setOpen({ kind, orgId }), []);
   return (
     <NewListContext.Provider value={openNew}>
       {children}
-      {open && <NewListDialog initialKind={open} onClose={() => setOpen(null)} />}
+      {open && <NewListDialog initialKind={open.kind} initialOrg={open.orgId} onClose={() => setOpen(null)} />}
     </NewListContext.Provider>
   );
 }
